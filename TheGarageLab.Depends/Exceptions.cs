@@ -10,7 +10,7 @@ namespace TheGarageLab.Depends
     /// Exception thrown when a class registered for an interface does not
     /// implement that interface.
     /// </summary>
-    internal class ClassDoesNotImplementInterfaceException : Exception
+    public class ClassDoesNotImplementInterfaceException : Exception
     {
     }
 
@@ -18,7 +18,7 @@ namespace TheGarageLab.Depends
     /// Exception throw when there is no class registered as an implementation
     /// for the given interface.
     /// </summary>
-    internal class NoImplementationSpecifiedForInterfaceException : Exception
+    public class NoImplementationSpecifiedForInterfaceException : Exception
     {
     }
 
@@ -26,7 +26,7 @@ namespace TheGarageLab.Depends
     /// Exception thrown when a suitable constructor could not be found to
     /// perform the injection.
     /// </summary>
-    internal class NoSuitableConstructorFoundException : Exception
+    public class NoSuitableConstructorFoundException : Exception
     {
     }
 

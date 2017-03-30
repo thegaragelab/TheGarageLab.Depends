@@ -15,7 +15,10 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateFromClassType()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            var result = resolver.Resolve(typeof(TestCases.ImplementationOfIService1));
+            Assert.NotNull(result);
+            Assert.Equal(typeof(TestCases.ImplementationOfIService1), result.GetType());
         }
 
         /// <summary>
@@ -35,7 +38,10 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateDefaultImplementation()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            var result = resolver.Resolve(typeof(TestCases.IService1));
+            Assert.NotNull(result);
+            Assert.Equal(typeof(TestCases.DefaultImplementationOfIService1), result.GetType());
         }
 
         /// <summary>
@@ -45,7 +51,16 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateRegisteredImplementation()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            // Verify there is a default implementation
+            var result = resolver.Resolve(typeof(TestCases.IService1));
+            Assert.NotNull(result);
+            Assert.Equal(typeof(TestCases.DefaultImplementationOfIService1), result.GetType());
+            // Register a non-default implementation and resolve
+            resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
+            result = resolver.Resolve(typeof(TestCases.IService1));
+            Assert.NotNull(result);
+            Assert.Equal(typeof(TestCases.ImplementationOfIService1), result.GetType());
         }
 
         /// <summary>
@@ -55,7 +70,14 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateWithoutDefaultImplementation()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            // Verify there is not a default implementation
+            Assert.Throws<NoImplementationSpecifiedForInterfaceException>(() => { resolver.Resolve(typeof(TestCases.IService2)); });
+            // Register the implementation and ensure it is resolved
+            resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
+            var result = resolver.Resolve(typeof(TestCases.IService2));
+            Assert.NotNull(result);
+            Assert.Equal(typeof(TestCases.ImplementationOfIService2), result.GetType());
         }
 
         /// <summary>
@@ -65,7 +87,9 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillNotInstantiateUnregisteredInterface()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            // Verify there is not a default implementation
+            Assert.Throws<NoImplementationSpecifiedForInterfaceException>(() => { resolver.Resolve(typeof(TestCases.IService2)); });
         }
 
     }

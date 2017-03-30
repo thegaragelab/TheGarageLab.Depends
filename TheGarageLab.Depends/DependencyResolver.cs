@@ -12,51 +12,25 @@ namespace TheGarageLab.Depends
     /// </summary>
     public class DependencyResolver : IResolver
     {
+        // Lock object to control access to the default mappings
         private static object m_defaultLock = new object();
+
+        // The actual default mappings, lazy initialised on first access
         private static Dictionary<Type, Type> m_defaults;
+
+        /// <summary>
+        /// Provide access to the shared mapping of default implementations
+        /// (classes marked with the DefaultImplementation attribute)
+        /// </summary>
         protected static Dictionary<Type, Type> Defaults
         {
             get
             {
+                // This is global state so make sure multiple
+                // threads don't try and modify it at the same time.
                 Monitor.Enter(m_defaultLock);
                 if (m_defaults == null)
-                { // TODO: Create and populate the list of default mappings
-                  // Scan all loaded classes for default implementations
-                    IEnumerator enumerator = Thread.GetDomain().GetAssemblies().GetEnumerator();
-                    while (enumerator.MoveNext())
-                    {
-                        try
-                        {
-                            Type[] types = ((Assembly)enumerator.Current).GetTypes();
-                            if (!((Assembly)enumerator.Current).FullName.StartsWith("System."))
-                            {
-                                IEnumerator enumerator2 = types.GetEnumerator();
-                                while (enumerator2.MoveNext())
-                                {
-                                    Type current = (Type)enumerator2.Current;
-                                    if (current.IsAbstract || current.IsInterface)
-                                        continue;
-                                    foreach (var attribute in current.CustomAttributes)
-                                    {
-                                        if (attribute.AttributeType == typeof(DefaultImplementation))
-                                        {
-                                            Type target = attribute.ConstructorArguments[0].Value as Type;
-                                            // TODO: Register implementation here
-//                                            if (Locator.Current.GetService(target) == null)
-//                                                Register(target, current);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        catch (ReflectionTypeLoadException ex)
-                        {
-                            Console.WriteLine("Failed to enumerate types from assembiles. More information ...");
-                            foreach (var e in ex.LoaderExceptions)
-                                Console.WriteLine("  {0}", e.ToString());
-                        }
-                    }
-                }
+                    m_defaults = FindDefaultRegistrations();
                 Monitor.Exit(m_defaultLock);
                 return m_defaults;
             }
@@ -96,6 +70,52 @@ namespace TheGarageLab.Depends
         public DependencyResolver() : this(null) { }
 
         #region Helpers
+        /// <summary>
+        /// Examines all loaded assemblies for classes marked as 
+        /// DefaultImplementation for an interface
+        /// </summary>
+        /// <returns></returns>
+        private static Dictionary<Type, Type> FindDefaultRegistrations()
+        {
+            Dictionary<Type, Type> results = new Dictionary<Type, Type>();
+            // Scan all loaded classes for default implementations
+            IEnumerator enumerator = Thread.GetDomain().GetAssemblies().GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                try
+                {
+                    Type[] types = ((Assembly)enumerator.Current).GetTypes();
+                    if (!((Assembly)enumerator.Current).FullName.StartsWith("System."))
+                    {
+                        IEnumerator enumerator2 = types.GetEnumerator();
+                        while (enumerator2.MoveNext())
+                        {
+                            Type current = (Type)enumerator2.Current;
+                            if (current.IsAbstract || current.IsInterface)
+                                continue;
+                            foreach (var attribute in current.CustomAttributes)
+                            {
+                                if (attribute.AttributeType == typeof(DefaultImplementation))
+                                {
+                                    Type target = attribute.ConstructorArguments[0].Value as Type;
+                                    // TODO: Register implementation here
+                                    //                                            if (Locator.Current.GetService(target) == null)
+                                    //                                                Register(target, current);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    Console.WriteLine("Failed to enumerate types from assembiles. More information ...");
+                    foreach (var e in ex.LoaderExceptions)
+                        Console.WriteLine("  {0}", e.ToString());
+                }
+            }
+            return results;
+        }
+
         /// <summary>
         /// Determine if the constructor only has interface parameters
         /// </summary>

@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestCases.cs" />
     <Compile Include="TestResolve.cs" />
   </ItemGroup>
   <ItemGroup>
