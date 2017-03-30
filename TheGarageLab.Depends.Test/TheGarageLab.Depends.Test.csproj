@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestResolve.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="coverage.bat" />
@@ -70,6 +71,9 @@
       <Project>{8a53d317-b22c-4b35-96f5-18415b0e8fea}</Project>
       <Name>TheGarageLab.Depends</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
