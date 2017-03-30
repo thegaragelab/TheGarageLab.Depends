@@ -49,5 +49,32 @@ namespace TheGarageLab.Depends.Test
                 Service = service;
             }
         }
+
+        public class ContainerWithMultipleConstructors
+        {
+            // Expose Service1 instance
+            public IService1 Service1 { get; private set; }
+
+            // Expose Service2 instance
+            public IService2 Service2 { get; private set; }
+
+            /// <summary>
+            /// Constructor with multiple services
+            /// </summary>
+            /// <param name="service1"></param>
+            /// <param name="service2"></param>
+            public ContainerWithMultipleConstructors(IService1 service1, IService2 service2)
+            {
+                Service1 = service1;
+                Service2 = service2;
+            }
+
+            /// <summary>
+            /// Constructor with injections
+            /// </summary>
+            /// <param name="service"></param>
+            public ContainerWithMultipleConstructors(IService1 service1) : this(service1, null) { }
+
+        }
     }
 }

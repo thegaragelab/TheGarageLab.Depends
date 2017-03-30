@@ -26,8 +26,18 @@ namespace TheGarageLab.Depends
     /// Exception thrown when a suitable constructor could not be found to
     /// perform the injection.
     /// </summary>
-    public class NoSuitableConstructorFoundException : Exception
+    public class UnableToDetermineInjectionPointException : Exception
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public UnableToDetermineInjectionPointException() : base() { }
+
+        /// <summary>
+        /// Constructor with the interface being provided with a default
+        /// </summary>
+        /// <param name="iface"></param>
+        public UnableToDetermineInjectionPointException(Type iface) : base(iface.FullName) { }
     }
 
     /// <summary>

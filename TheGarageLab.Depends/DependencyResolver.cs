@@ -147,21 +147,14 @@ namespace TheGarageLab.Depends
         private ConstructorInfo FindAppropriateConstructor(Type t)
         {
             var candidates = t.GetConstructors().Where(b => b.IsPublic);
-            int count = candidates.Count();
-            ConstructorInfo selected = null;
-            if (count == 1)
-                selected = candidates.First();
-            else
-            {
-                // Look for one that has the 'Injector' attributes
-                var injectable = candidates.Where(b => b.CustomAttributes.Where(c => c.AttributeType == typeof(Injector)).Count() > 0);
-                count = injectable.Count();
-                if (count == 1)
-                    selected = injectable.First();
-                else if (count > 1)
-                    throw new MultipleInjectionPointsException(t);
-            }
-            return selected;
+            if (candidates.Count() == 1)
+                return candidates.First();
+            // Look for one that has the 'Injector' attributes
+            var injectable = candidates.Where(b => b.CustomAttributes.Where(c => c.AttributeType == typeof(Injector)).Count() > 0);
+            if (injectable.Count() == 1)
+                return injectable.First();
+            // Could not determine injection point
+            return null;
         }
         #endregion
 
@@ -253,9 +246,7 @@ namespace TheGarageLab.Depends
             }
             // Find the constructor and list the arguments
             ConstructorInfo ctor = FindAppropriateConstructor(implementor);
-            if (ctor == null) // Use a default constructor
-                ctor = implementor.GetConstructor(new Type[] { });
-            Ensure.IsNotNull<NoSuitableConstructorFoundException>(ctor);
+            Ensure.IsNotNull<UnableToDetermineInjectionPointException>(ctor);
             // Recursivley create the required dependency arguments
             var parameters = ctor.GetParameters();
             object[] args = new object[parameters.Length];
