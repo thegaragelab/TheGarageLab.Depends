@@ -230,11 +230,14 @@ namespace TheGarageLab.Depends
         /// <returns></returns>
         public object Resolve(Type iface)
         {
-            // Only resolve interfaces
-            Ensure.IsTrue(iface.IsInterface);
+            Ensure.IsNotNull<ArgumentNullException>(iface);
             // Get the implementing class
-            Type implementor = GetImplementationFor(iface);
-            Ensure.IsNotNull<NoImplementationSpecifiedForInterfaceException>(implementor);
+            Type implementor = iface;
+            if (iface.IsInterface)
+            {
+                implementor = GetImplementationFor(iface);
+                Ensure.IsNotNull<NoImplementationSpecifiedForInterfaceException>(implementor);
+            }
             // Find the constructor and list the arguments
             ConstructorInfo ctor = FindAppropriateConstructor(implementor);
             if (ctor == null) // Use a default constructor
