@@ -28,7 +28,11 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateFromClassTypeAndInject()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            var result = resolver.Resolve(typeof(TestCases.ContainerWithDependencies));
+            Assert.NotNull(result);
+            Assert.NotNull((result as TestCases.ContainerWithDependencies).Service);
+            Assert.Equal(typeof(TestCases.DefaultImplementationOfIService1), (result as TestCases.ContainerWithDependencies).Service.GetType());
         }
 
         /// <summary>

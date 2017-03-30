@@ -71,6 +71,27 @@ namespace TheGarageLab.Depends
 
         #region Helpers
         /// <summary>
+        /// Determine if the class is a valid registration for the interface.
+        /// 
+        /// Must meet the following requirements:
+        ///   1. Neither type is null
+        ///   2. The iface parameter is an interface
+        ///   3. The cls parameter is a class
+        ///   2. The interface is assignable from the class
+        /// </summary>
+        /// <param name="iface"></param>
+        /// <param name="cls"></param>
+        /// <returns></returns>
+        private static void TestRegistrationTypes(Type iface, Type cls)
+        {
+            Ensure.IsNotNull<ArgumentNullException>(iface);
+            Ensure.IsTrue(iface.IsInterface);
+            Ensure.IsNotNull<ArgumentNullException>(cls);
+            Ensure.IsTrue(cls.IsClass);
+            Ensure.IsTrue<ClassDoesNotImplementInterfaceException>(iface.IsAssignableFrom(cls));
+        }
+
+        /// <summary>
         /// Examines all loaded assemblies for classes marked as 
         /// DefaultImplementation for an interface
         /// </summary>
@@ -98,9 +119,10 @@ namespace TheGarageLab.Depends
                                 if (attribute.AttributeType == typeof(DefaultImplementation))
                                 {
                                     Type target = attribute.ConstructorArguments[0].Value as Type;
-                                    // TODO: Register implementation here
-                                    //                                            if (Locator.Current.GetService(target) == null)
-                                    //                                                Register(target, current);
+                                    TestRegistrationTypes(target, current);
+                                    if (results.ContainsKey(target))
+                                        throw new MultipleDefaultImplementationsException(target);
+                                    results[target] = current;
                                 }
                             }
                         }
@@ -159,12 +181,7 @@ namespace TheGarageLab.Depends
         /// <returns></returns>
         public IResolver Register(Type iface, Type cls)
         {
-            // Verify arguments
-            Ensure.IsNotNull<ArgumentNullException>(iface);
-            Ensure.IsTrue(iface.IsInterface);
-            Ensure.IsNotNull<ArgumentNullException>(cls);
-            Ensure.IsTrue(cls.IsClass);
-            Ensure.IsTrue<ClassDoesNotImplementInterfaceException>(iface.IsAssignableFrom(cls));
+            TestRegistrationTypes(iface, cls);
             // Safely add to this resolvers mapping and create a child resolver for it
             Monitor.Enter(this);
             // Map the implementation

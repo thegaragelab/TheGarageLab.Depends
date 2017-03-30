@@ -32,5 +32,22 @@ namespace TheGarageLab.Depends.Test
         public class ImplementationOfIService3 : IService3 { }
 
         public class AlternativeImplementationOfIService3 : IService3 { }
+
+        public class ContainerWithDependencies
+        {
+            /// <summary>
+            /// Expose the created service
+            /// </summary>
+            public IService1 Service { get; private set; }
+
+            /// <summary>
+            /// Constructor with injections
+            /// </summary>
+            /// <param name="service"></param>
+            public ContainerWithDependencies(IService1 service)
+            {
+                Service = service;
+            }
+        }
     }
 }

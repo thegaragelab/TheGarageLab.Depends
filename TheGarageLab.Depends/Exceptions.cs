@@ -30,4 +30,22 @@ namespace TheGarageLab.Depends
     {
     }
 
+    /// <summary>
+    /// Exception thrown when multiple default implementations of a specific
+    /// interface have been found.
+    /// </summary>
+    public class MultipleDefaultImplementationsException : Exception
+    {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public MultipleDefaultImplementationsException() : base() { }
+
+        /// <summary>
+        /// Constructor with the interface being provided with a default
+        /// </summary>
+        /// <param name="iface"></param>
+        public MultipleDefaultImplementationsException(Type iface) : base(iface.ToString()) { }
+    }
+
 }
