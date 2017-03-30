@@ -15,4 +15,14 @@ namespace TheGarageLab.Depends
         /// <param name="forType"></param>
         public DefaultImplementation(Type forType) { }
     }
+
+    /// <summary>
+    /// This attribute is used to determine the appropriate constructor
+    /// to use for injection if there are multiple candidates available.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Constructor)]
+    public class Injector : Attribute
+    {
+        public Injector() { }
+    }
 }

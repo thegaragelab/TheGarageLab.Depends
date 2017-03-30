@@ -44,7 +44,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultImplementation.cs" />
+    <Compile Include="Attributes.cs" />
     <Compile Include="DependencyResolver.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="IResolver.cs" />

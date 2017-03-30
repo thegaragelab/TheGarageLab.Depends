@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Reflection;
 using System.Collections;
@@ -139,33 +140,28 @@ namespace TheGarageLab.Depends
         }
 
         /// <summary>
-        /// Determine if the constructor only has interface parameters
-        /// </summary>
-        /// <param name="ctor"></param>
-        /// <returns></returns>
-        private bool HasOnlyInterfaceParameters(ConstructorInfo ctor)
-        {
-            foreach (var param in ctor.GetParameters())
-            {
-                if (!param.ParameterType.IsInterface)
-                    return false;
-            }
-            return true;
-        }
-
-        /// <summary>
         /// Find a constructor that has only Interface parameters
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
         private ConstructorInfo FindAppropriateConstructor(Type t)
         {
-            foreach (var ctor in t.GetConstructors())
+            var candidates = t.GetConstructors().Where(b => b.IsPublic);
+            int count = candidates.Count();
+            ConstructorInfo selected = null;
+            if (count == 1)
+                selected = candidates.First();
+            else
             {
-                if (ctor.IsPublic && HasOnlyInterfaceParameters(ctor))
-                    return ctor;
+                // Look for one that has the 'Injector' attributes
+                var injectable = candidates.Where(b => b.CustomAttributes.Where(c => c.AttributeType == typeof(Injector)).Count() > 0);
+                count = injectable.Count();
+                if (count == 1)
+                    selected = injectable.First();
+                else if (count > 1)
+                    throw new MultipleInjectionPointsException(t);
             }
-            return null;
+            return selected;
         }
         #endregion
 

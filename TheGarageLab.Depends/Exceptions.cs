@@ -45,7 +45,23 @@ namespace TheGarageLab.Depends
         /// Constructor with the interface being provided with a default
         /// </summary>
         /// <param name="iface"></param>
-        public MultipleDefaultImplementationsException(Type iface) : base(iface.ToString()) { }
+        public MultipleDefaultImplementationsException(Type iface) : base(iface.FullName) { }
     }
 
+    /// <summary>
+    /// Exception thrown when multiple injection points where found in a class
+    /// </summary>
+    public class MultipleInjectionPointsException : Exception
+    {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public MultipleInjectionPointsException() { }
+
+        /// <summary>
+        /// Constructor with the class the error was found in
+        /// </summary>
+        /// <param name="forClass"></param>
+        public MultipleInjectionPointsException(Type forClass) : base(forClass.FullName) { }
+    }
 }
