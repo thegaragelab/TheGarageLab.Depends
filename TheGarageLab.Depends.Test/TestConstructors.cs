@@ -19,7 +19,10 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseDefaultConstructor()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            var instance = resolver.Resolve(typeof(TestCases.ContainerWithExplicitDefaultConstructor));
+            Assert.Equal(typeof(TestCases.ContainerWithExplicitDefaultConstructor), instance.GetType());
+            Assert.True((instance as TestCases.ContainerWithExplicitDefaultConstructor).DefaultConstructorInvoked);
         }
 
         /// <summary>
@@ -29,7 +32,9 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseAutomaticDefaultConstructor()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            var instance = resolver.Resolve(typeof(TestCases.ContainerWithAutomaticDefaultConstructor));
+            Assert.Equal(typeof(TestCases.ContainerWithAutomaticDefaultConstructor), instance.GetType());
         }
 
         /// <summary>
@@ -39,7 +44,20 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseConstructorWithClassParameters()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
+            var instance = resolver.Resolve(typeof(TestCases.ContainerWithClassInConstructor));
+            Assert.NotNull(instance);
+            Assert.NotNull((instance as TestCases.ContainerWithClassInConstructor).Container);
+            Assert.Equal(
+                typeof(TestCases.ContainerWithAutomaticDefaultConstructor),
+                (instance as TestCases.ContainerWithClassInConstructor).Container.GetType()
+                );
+            Assert.NotNull((instance as TestCases.ContainerWithClassInConstructor).Service1);
+            Assert.Equal(
+                typeof(TestCases.ImplementationOfIService1),
+                (instance as TestCases.ContainerWithClassInConstructor).Service1.GetType()
+                );
         }
 
         /// <summary>
@@ -62,7 +80,14 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseInjectorAttribute()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
+            resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
+            var instance = resolver.Resolve(typeof(TestCases.ContainerWithMultipleConstructorsAndAttribute));
+            Assert.NotNull(instance);
+            Assert.Equal(typeof(TestCases.ContainerWithMultipleConstructorsAndAttribute), instance.GetType());
+            Assert.NotNull((instance as TestCases.ContainerWithMultipleConstructorsAndAttribute).Service1);
+            Assert.Null((instance as TestCases.ContainerWithMultipleConstructorsAndAttribute).Service2);
         }
 
         /// <summary>
@@ -72,7 +97,14 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WilFailIfMoreThanOneMarkedConstructor()
         {
-            Assert.True(false, "Not implemented");
+            var resolver = new DependencyResolver();
+            resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
+            resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
+            Assert.Throws<UnableToDetermineInjectionPointException>(
+                () =>
+                {
+                    resolver.Resolve(typeof(TestCases.ContainerWithMultipleConstructorsAndMultipleAttributes));
+                });
         }
     }
 }

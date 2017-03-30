@@ -76,5 +76,87 @@ namespace TheGarageLab.Depends.Test
             public ContainerWithMultipleConstructors(IService1 service1) : this(service1, null) { }
 
         }
+
+        public class ContainerWithMultipleConstructorsAndAttribute
+        {
+            // Expose Service1 instance
+            public IService1 Service1 { get; private set; }
+
+            // Expose Service2 instance
+            public IService2 Service2 { get; private set; }
+
+            /// <summary>
+            /// Constructor with multiple services
+            /// </summary>
+            /// <param name="service1"></param>
+            /// <param name="service2"></param>
+            public ContainerWithMultipleConstructorsAndAttribute(IService1 service1, IService2 service2)
+            {
+                Service1 = service1;
+                Service2 = service2;
+            }
+
+            /// <summary>
+            /// Constructor with injections
+            /// </summary>
+            /// <param name="service"></param>
+            [Injector]
+            public ContainerWithMultipleConstructorsAndAttribute(IService1 service1) : this(service1, null) { }
+
+        }
+
+        public class ContainerWithMultipleConstructorsAndMultipleAttributes
+        {
+            // Expose Service1 instance
+            public IService1 Service1 { get; private set; }
+
+            // Expose Service2 instance
+            public IService2 Service2 { get; private set; }
+
+            /// <summary>
+            /// Constructor with multiple services
+            /// </summary>
+            /// <param name="service1"></param>
+            /// <param name="service2"></param>
+            [Injector]
+            public ContainerWithMultipleConstructorsAndMultipleAttributes(IService1 service1, IService2 service2)
+            {
+                Service1 = service1;
+                Service2 = service2;
+            }
+
+            /// <summary>
+            /// Constructor with injections
+            /// </summary>
+            /// <param name="service"></param>
+            [Injector]
+            public ContainerWithMultipleConstructorsAndMultipleAttributes(IService1 service1) : this(service1, null) { }
+
+        }
+
+        public class ContainerWithExplicitDefaultConstructor
+        {
+            public bool DefaultConstructorInvoked { get; private set; }
+
+            public ContainerWithExplicitDefaultConstructor()
+            {
+                DefaultConstructorInvoked = true;
+            }
+        }
+
+        public class ContainerWithAutomaticDefaultConstructor { }
+
+        public class ContainerWithClassInConstructor
+        {
+            public IService1 Service1 { get; private set; }
+
+            public ContainerWithAutomaticDefaultConstructor Container { get; private set; }
+
+            public ContainerWithClassInConstructor(IService1 service1, ContainerWithAutomaticDefaultConstructor container)
+            {
+                Service1 = service1;
+                Container = container;
+            }
+        }
     }
 }
