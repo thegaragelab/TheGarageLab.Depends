@@ -18,6 +18,8 @@ namespace TheGarageLab.Depends.Test
 
         public interface IService3 { }
 
+        public interface IService3Extended : IService3 { }
+
         public class ImplementationOfIService1 : IService1 { }
 
         public class AlternativeImplementationOfIService1 : IService1 { }
@@ -31,7 +33,11 @@ namespace TheGarageLab.Depends.Test
 
         public class ImplementationOfIService3 : IService3 { }
 
-        public class AlternativeImplementationOfIService3 : IService3 { }
+        /// <summary>
+        /// Subclass of another implementation. Should be treated as a new
+        /// implementation.
+        /// </summary>
+        public class AlternativeImplementationOfIService3 : ImplementationOfIService3 { }
 
         public class ContainerWithDependencies
         {
