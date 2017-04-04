@@ -8,6 +8,12 @@ namespace TheGarageLab.Depends
     /// </summary>
     public interface IResolver
     {
+        /// <summary>
+        /// Register an implementing class for the interface (or parent class)
+        /// </summary>
+        /// <param name="iface"></param>
+        /// <param name="cls"></param>
+        /// <returns></returns>
         IResolver Register(Type iface, Type cls);
 
         /// <summary>
