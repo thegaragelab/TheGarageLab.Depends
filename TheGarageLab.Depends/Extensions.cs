@@ -14,9 +14,10 @@ namespace TheGarageLab.Depends
         /// <typeparam name="T1"></typeparam>
         /// <typeparam name="T2"></typeparam>
         /// <param name="resolver"></param>
-        public static void Register<T1, T2>(this IResolver resolver)
+        /// <param name="lifetime"></param>
+        public static void Register<T1, T2>(this IResolver resolver, Lifetime lifetime = Lifetime.Transient)
         {
-            resolver.Register(typeof(T1), typeof(T2));
+            resolver.Register(typeof(T1), typeof(T2), lifetime);
         }
 
         /// <summary>

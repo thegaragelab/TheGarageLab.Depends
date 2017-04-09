@@ -64,6 +64,7 @@
     <Compile Include="TestConstructors.cs" />
     <Compile Include="TestRegister.cs" />
     <Compile Include="TestResolve.cs" />
+    <Compile Include="TestSingletons.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="coverage.bat" />
