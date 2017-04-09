@@ -23,7 +23,7 @@ namespace TheGarageLab.Depends
         /// <param name="iface"></param>
         /// <param name="singleton"></param>
         /// <returns></returns>
-        IResolver Register(Type iface, object singleton);
+        void Register(Type iface, object singleton);
 
         /// <summary>
         /// Register a factory function for the interface.
@@ -32,7 +32,7 @@ namespace TheGarageLab.Depends
         /// <param name="factory"></param>
         /// <param name="lifetime"></param>
         /// <returns></returns>
-        IResolver Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient);
+        void Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient);
 
         /// <summary>
         /// Get the specific resolver to use for an implementing class. This

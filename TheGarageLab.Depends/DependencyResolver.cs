@@ -49,9 +49,9 @@ namespace TheGarageLab.Depends
         private Dictionary<Type, IInstanceCreator> Implementations;
 
         /// <summary>
-        /// Map child resolvers to implementing classes
+        /// Map child resolvers to implementors
         /// </summary>
-        protected Dictionary<Type, DependencyResolver> Resolvers;
+        private Dictionary<Type, DependencyResolver> Resolvers;
 
         /// <summary>
         /// Constructor with a parent. This is only used internally to
@@ -163,6 +163,23 @@ namespace TheGarageLab.Depends
                 throw new NoImplementationSpecifiedForInterfaceException();
             return new ClassInstanceCreator(t, Lifetime.Transient);
         }
+
+        /// <summary>
+        /// Map an instance creator to a type.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="creator"></param>
+        /// <returns></returns>
+        private void RegisterCreator(Type t, IInstanceCreator creator)
+        {
+            // Safely add to this resolvers mapping and create a child resolver for it
+            Monitor.Enter(this);
+            // Map the implementation
+            if (Implementations == null)
+                Implementations = new Dictionary<Type, IInstanceCreator>();
+            Implementations[t] = creator;
+            Monitor.Exit(this);
+        }
         #endregion
 
         #region Implementation of IResolver
@@ -179,18 +196,8 @@ namespace TheGarageLab.Depends
         public IResolver Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient)
         {
             TestRegistrationTypes(iface, cls);
-            // Safely add to this resolvers mapping and create a child resolver for it
-            Monitor.Enter(this);
-            // Map the implementation
-            if (Implementations == null)
-                Implementations = new Dictionary<Type, IInstanceCreator>();
-            Implementations[iface] = new ClassInstanceCreator(cls, lifetime);
-            // Create the child resolver
-            if (Resolvers == null)
-                Resolvers = new Dictionary<Type, DependencyResolver>();
-            Resolvers[cls] = new DependencyResolver(this);
-            Monitor.Exit(this);
-            return Resolvers[cls];
+            RegisterCreator(iface, new ClassInstanceCreator(cls, lifetime));
+            return GetResolverFor(cls);
         }
 
         /// <summary>
@@ -199,9 +206,14 @@ namespace TheGarageLab.Depends
         /// <param name="iface"></param>
         /// <param name="singleton"></param>
         /// <returns></returns>
-        public IResolver Register(Type iface, object singleton)
+        public void Register(Type iface, object singleton)
         {
-            throw new NotImplementedException();
+            // Check parameters
+            Ensure.IsNotNull(iface);
+            Ensure.IsNotNull(singleton);
+            Ensure.IsTrue<ClassDoesNotImplementInterfaceException>(iface.IsAssignableFrom(singleton.GetType()));
+            // Register the creator
+            RegisterCreator(iface, new SingletonInstanceCreator(singleton));
         }
 
         /// <summary>
@@ -211,7 +223,7 @@ namespace TheGarageLab.Depends
         /// <param name="factory"></param>
         /// <param name="lifetime"></param>
         /// <returns></returns>
-        public IResolver Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient)
+        public void Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient)
         {
             throw new NotImplementedException();
         }
