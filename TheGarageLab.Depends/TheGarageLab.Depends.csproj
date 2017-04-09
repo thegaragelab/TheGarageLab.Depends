@@ -45,9 +45,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes.cs" />
+    <Compile Include="ClassInstanceCreator.cs" />
     <Compile Include="DependencyResolver.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="IInstanceCreator.cs" />
     <Compile Include="IResolver.cs" />
+    <Compile Include="Lifetime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions.cs" />
   </ItemGroup>

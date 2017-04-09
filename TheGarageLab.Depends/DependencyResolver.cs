@@ -17,13 +17,13 @@ namespace TheGarageLab.Depends
         private static object m_defaultLock = new object();
 
         // The actual default mappings, lazy initialised on first access
-        private static Dictionary<Type, Type> m_defaults;
+        private static Dictionary<Type, IInstanceCreator> m_defaults;
 
         /// <summary>
         /// Provide access to the shared mapping of default implementations
         /// (classes marked with the DefaultImplementation attribute)
         /// </summary>
-        protected static Dictionary<Type, Type> Defaults
+        private static Dictionary<Type, IInstanceCreator> Defaults
         {
             get
             {
@@ -44,9 +44,9 @@ namespace TheGarageLab.Depends
         protected DependencyResolver Parent { get; private set; }
 
         /// <summary>
-        /// Map interfaces to implementing classes
+        /// Map interfaces to instance creators
         /// </summary>
-        protected Dictionary<Type, Type> Implementations;
+        private Dictionary<Type, IInstanceCreator> Implementations;
 
         /// <summary>
         /// Map child resolvers to implementing classes
@@ -97,9 +97,9 @@ namespace TheGarageLab.Depends
         /// DefaultImplementation for an interface
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<Type, Type> FindDefaultRegistrations()
+        private static Dictionary<Type, IInstanceCreator> FindDefaultRegistrations()
         {
-            Dictionary<Type, Type> results = new Dictionary<Type, Type>();
+            Dictionary<Type, IInstanceCreator> results = new Dictionary<Type, IInstanceCreator>();
             // Scan all loaded classes for default implementations
             IEnumerator enumerator = Thread.GetDomain().GetAssemblies().GetEnumerator();
             while (enumerator.MoveNext())
@@ -120,10 +120,11 @@ namespace TheGarageLab.Depends
                                 if (attribute.AttributeType == typeof(DefaultImplementation))
                                 {
                                     Type target = attribute.ConstructorArguments[0].Value as Type;
+                                    Lifetime lifetime = (Lifetime)attribute.ConstructorArguments[1].Value;
                                     TestRegistrationTypes(target, current);
                                     if (results.ContainsKey(target))
                                         throw new MultipleDefaultImplementationsException(target);
-                                    results[target] = current;
+                                    results[target] = new ClassInstanceCreator(current, lifetime);
                                 }
                             }
                         }
@@ -131,7 +132,7 @@ namespace TheGarageLab.Depends
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
-                    Console.WriteLine("Failed to enumerate types from assembiles. More information ...");
+                    Console.WriteLine("Failed to enumerate types from assemblies. More information ...");
                     foreach (var e in ex.LoaderExceptions)
                         Console.WriteLine("  {0}", e.ToString());
                 }
@@ -140,21 +141,27 @@ namespace TheGarageLab.Depends
         }
 
         /// <summary>
-        /// Find a constructor that has only Interface parameters
+        /// Walk the resolver tree to find an appropriate instance
+        /// creator for this class.
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        private ConstructorInfo FindAppropriateConstructor(Type t)
+        private IInstanceCreator FindCreatorFor(Type t)
         {
-            var candidates = t.GetConstructors().Where(b => b.IsPublic);
-            if (candidates.Count() == 1)
-                return candidates.First();
-            // Look for one that has the 'Injector' attributes
-            var injectable = candidates.Where(b => b.CustomAttributes.Where(c => c.AttributeType == typeof(Injector)).Count() > 0);
-            if (injectable.Count() == 1)
-                return injectable.First();
-            // Could not determine injection point
-            return null;
+            // Check for creator at this level
+            IInstanceCreator creator;
+            if ((Implementations != null) && Implementations.TryGetValue(t, out creator))
+                return creator;
+            // Check the parent for a creator
+            if (Parent != null)
+                return Parent.FindCreatorFor(t);
+            // Check defaults
+            if (Defaults.TryGetValue(t, out creator))
+                return creator;
+            // Finally, see if it can be created directly
+            if (!t.IsClass || t.IsAbstract)
+                throw new NoImplementationSpecifiedForInterfaceException();
+            return new ClassInstanceCreator(t, Lifetime.Transient);
         }
         #endregion
 
@@ -167,16 +174,17 @@ namespace TheGarageLab.Depends
         /// </summary>
         /// <param name="iface"></param>
         /// <param name="cls"></param>
+        /// <param name="lifetime"></param>
         /// <returns></returns>
-        public IResolver Register(Type iface, Type cls)
+        public IResolver Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient)
         {
             TestRegistrationTypes(iface, cls);
             // Safely add to this resolvers mapping and create a child resolver for it
             Monitor.Enter(this);
             // Map the implementation
             if (Implementations == null)
-                Implementations = new Dictionary<Type, Type>();
-            Implementations[iface] = cls;
+                Implementations = new Dictionary<Type, IInstanceCreator>();
+            Implementations[iface] = new ClassInstanceCreator(cls, lifetime);
             // Create the child resolver
             if (Resolvers == null)
                 Resolvers = new Dictionary<Type, DependencyResolver>();
@@ -186,26 +194,26 @@ namespace TheGarageLab.Depends
         }
 
         /// <summary>
-        /// Determine the class that implements the requested interface.
+        /// Register a singleton instance for the interface.
         /// </summary>
         /// <param name="iface"></param>
+        /// <param name="singleton"></param>
         /// <returns></returns>
-        public Type GetImplementationFor(Type iface)
+        public IResolver Register(Type iface, object singleton)
         {
-            // Verify arguments
-            Ensure.IsNotNull<ArgumentNullException>(iface);
-            Ensure.IsTrue(iface.IsInterface);
-            // Find a mapping in the tree
-            Monitor.Enter(this);
-            Type implementor = null;
-            if ((Implementations != null) && Implementations.ContainsKey(iface))
-                implementor = Implementations[iface];
-            else if (Parent != null)
-                implementor = Parent.GetImplementationFor(iface);
-            else if (Defaults.ContainsKey(iface))
-                implementor = Defaults[iface];
-            Monitor.Exit(this);
-            return implementor;
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Register a factory function for the interface.
+        /// </summary>
+        /// <param name="iface"></param>
+        /// <param name="factory"></param>
+        /// <param name="lifetime"></param>
+        /// <returns></returns>
+        public IResolver Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -237,23 +245,7 @@ namespace TheGarageLab.Depends
         public object Resolve(Type iface)
         {
             Ensure.IsNotNull<ArgumentNullException>(iface);
-            // Get the implementing class
-            Type implementor = iface;
-            if (iface.IsInterface)
-            {
-                implementor = GetImplementationFor(iface);
-                Ensure.IsNotNull<NoImplementationSpecifiedForInterfaceException>(implementor);
-            }
-            // Find the constructor and list the arguments
-            ConstructorInfo ctor = FindAppropriateConstructor(implementor);
-            Ensure.IsNotNull<UnableToDetermineInjectionPointException>(ctor);
-            // Recursivley create the required dependency arguments
-            var parameters = ctor.GetParameters();
-            object[] args = new object[parameters.Length];
-            for (int p = 0; p < parameters.Length; p++)
-                args[p] = GetResolverFor(implementor).Resolve(parameters[p].ParameterType);
-            // Finally, create the object
-            return Activator.CreateInstance(implementor, args);
+            return FindCreatorFor(iface).CreateInstance(this);
         }
         #endregion
     }

@@ -13,7 +13,8 @@ namespace TheGarageLab.Depends
         /// Indicate the type this implementation is the default for
         /// </summary>
         /// <param name="forType"></param>
-        public DefaultImplementation(Type forType) { }
+        /// <param name="lifetime"></param>
+        public DefaultImplementation(Type forType, Lifetime lifetime = Lifetime.Transient) { }
     }
 
     /// <summary>

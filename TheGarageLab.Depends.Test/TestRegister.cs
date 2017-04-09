@@ -16,7 +16,8 @@ namespace TheGarageLab.Depends.Test
         {
             var resolver = new DependencyResolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
-            Assert.Equal(typeof(TestCases.ImplementationOfIService1), resolver.GetImplementationFor(typeof(TestCases.IService1)));
+            var created = resolver.Resolve(typeof(TestCases.IService1));
+            Assert.Equal(typeof(TestCases.ImplementationOfIService1), created.GetType());
         }
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace TheGarageLab.Depends.Test
         public void WillNotRegisterForNullClass()
         {
             var resolver = new DependencyResolver();
-            Assert.Throws<ArgumentNullException>(() => { resolver.Register(typeof(TestCases.IService3), null); });
+            Assert.Throws<ArgumentNullException>(() => { resolver.Register(typeof(TestCases.IService3), (Type)null); });
         }
     }
 }
