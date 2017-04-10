@@ -15,7 +15,7 @@ namespace TheGarageLab.Depends
         /// <param name="cls"></param>
         /// <param name="lifetime"></param>
         /// <returns></returns>
-        IResolver Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient);
+        void Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient);
 
         /// <summary>
         /// Register a singleton instance for the interface.
@@ -33,15 +33,6 @@ namespace TheGarageLab.Depends
         /// <param name="lifetime"></param>
         /// <returns></returns>
         void Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient);
-
-        /// <summary>
-        /// Get the specific resolver to use for an implementing class. This
-        /// should walk the tree up to the default implementations looking
-        /// for an implementation.
-        /// </summary>
-        /// <param name="t"></param>
-        /// <returns></returns>
-        IResolver GetResolverFor(Type t);
 
         /// <summary>
         /// Resolve an interface to it's required concrete implementation.

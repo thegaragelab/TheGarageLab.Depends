@@ -38,37 +38,9 @@ namespace TheGarageLab.Depends
         }
 
         /// <summary>
-        /// The parent resolver. The root of a specific dependency tree will not
-        /// have a parent.
-        /// </summary>
-        protected DependencyResolver Parent { get; private set; }
-
-        /// <summary>
         /// Map interfaces to instance creators
         /// </summary>
         private Dictionary<Type, IInstanceCreator> Implementations;
-
-        /// <summary>
-        /// Map child resolvers to implementors
-        /// </summary>
-        private Dictionary<Type, DependencyResolver> Resolvers;
-
-        /// <summary>
-        /// Constructor with a parent. This is only used internally to
-        /// build the dependency tree.
-        /// </summary>
-        /// <param name="parent"></param>
-        protected DependencyResolver(DependencyResolver parent)
-        {
-            Parent = parent;
-        }
-
-        /// <summary>
-        /// Default constructor
-        /// 
-        /// This is used to create the root node of a dependency tree.
-        /// </summary>
-        public DependencyResolver() : this(null) { }
 
         #region Helpers
         /// <summary>
@@ -152,9 +124,6 @@ namespace TheGarageLab.Depends
             IInstanceCreator creator;
             if ((Implementations != null) && Implementations.TryGetValue(t, out creator))
                 return creator;
-            // Check the parent for a creator
-            if (Parent != null)
-                return Parent.FindCreatorFor(t);
             // Check defaults
             if (Defaults.TryGetValue(t, out creator))
                 return creator;
@@ -193,11 +162,10 @@ namespace TheGarageLab.Depends
         /// <param name="cls"></param>
         /// <param name="lifetime"></param>
         /// <returns></returns>
-        public IResolver Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient)
+        public void Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient)
         {
             TestRegistrationTypes(iface, cls);
             RegisterCreator(iface, new ClassInstanceCreator(cls, lifetime));
-            return GetResolverFor(cls);
         }
 
         /// <summary>
@@ -226,26 +194,6 @@ namespace TheGarageLab.Depends
         public void Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Find the resolver for a specific class
-        /// </summary>
-        /// <param name="cls"></param>
-        /// <returns></returns>
-        public IResolver GetResolverFor(Type cls)
-        {
-            // Check arguments
-            Ensure.IsNotNull<ArgumentNullException>(cls);
-            Ensure.IsTrue(cls.IsClass);
-            // Safely fetch or create a resolver
-            Monitor.Enter(this);
-            if (Resolvers == null)
-                Resolvers = new Dictionary<Type, DependencyResolver>();
-            if (!Resolvers.ContainsKey(cls))
-                Resolvers[cls] = new DependencyResolver(this);
-            Monitor.Exit(this);
-            return Resolvers[cls];
         }
 
         /// <summary>

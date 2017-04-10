@@ -58,7 +58,7 @@ namespace TheGarageLab.Depends
             var parameters = ctor.GetParameters();
             object[] args = new object[parameters.Length];
             for (int p = 0; p < parameters.Length; p++)
-                args[p] = resolver.GetResolverFor(ForClass).Resolve(parameters[p].ParameterType);
+                args[p] = resolver.Resolve(parameters[p].ParameterType);
             // Create the object (and save it if it is a singleton)
             object result = Activator.CreateInstance(ForClass, args);
             if (Lifetime == Lifetime.Singleton)
