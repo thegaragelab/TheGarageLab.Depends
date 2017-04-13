@@ -9,19 +9,14 @@ namespace TheGarageLab.Depends
     /// <summary>
     /// Instance creator for pre-created singletons.
     /// </summary>
-    internal class SingletonInstanceCreator : IInstanceCreator
+    internal class SingletonFactory : AbstractFactory
     {
-        /// <summary>
-        /// The singleton instance.
-        /// </summary>
-        private readonly object Singleton;
-
         /// <summary>
         /// Constructor with the singleton to return for this
         /// creator
         /// </summary>
         /// <param name="singleton"></param>
-        public SingletonInstanceCreator(object singleton)
+        public SingletonFactory(object singleton) : base(Lifetime.Singleton)
         {
             Singleton = singleton;
         }
@@ -31,9 +26,10 @@ namespace TheGarageLab.Depends
         /// </summary>
         /// <param name="resolver"></param>
         /// <returns></returns>
-        public object CreateInstance(IResolver resolver)
+        protected override object Factory(IResolver resolver)
         {
-            return Singleton;
+            // This method should never be called
+            throw new NotImplementedException();
         }
     }
 }

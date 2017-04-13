@@ -44,17 +44,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractFactory.cs" />
     <Compile Include="Attributes.cs" />
-    <Compile Include="ClassInstanceCreator.cs" />
+    <Compile Include="ClassFactory.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="IInstanceCreator.cs" />
     <Compile Include="IResolver.cs" />
     <Compile Include="Lifetime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="SingletonInstanceCreator.cs" />
+    <Compile Include="SingletonFactory.cs" />
     <Compile Include="Resolver.cs" />
-    <Compile Include="FactoryInstanceCreator.cs" />
+    <Compile Include="FunctionFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -17,13 +17,13 @@ namespace TheGarageLab.Depends
         private static object m_defaultLock = new object();
 
         // The actual default mappings, lazy initialised on first access
-        private static Dictionary<Type, IInstanceCreator> m_defaults;
+        private static Dictionary<Type, AbstractFactory> m_defaults;
 
         /// <summary>
         /// Provide access to the shared mapping of default implementations
         /// (classes marked with the DefaultImplementation attribute)
         /// </summary>
-        private static Dictionary<Type, IInstanceCreator> Defaults
+        private static Dictionary<Type, AbstractFactory> Defaults
         {
             get
             {
@@ -40,7 +40,7 @@ namespace TheGarageLab.Depends
         /// <summary>
         /// Map interfaces to instance creators
         /// </summary>
-        private Dictionary<Type, IInstanceCreator> Implementations;
+        private Dictionary<Type, AbstractFactory> Implementations;
 
         #region Helpers
         /// <summary>
@@ -69,9 +69,9 @@ namespace TheGarageLab.Depends
         /// DefaultImplementation for an interface
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<Type, IInstanceCreator> FindDefaultRegistrations()
+        private static Dictionary<Type, AbstractFactory> FindDefaultRegistrations()
         {
-            Dictionary<Type, IInstanceCreator> results = new Dictionary<Type, IInstanceCreator>();
+            Dictionary<Type, AbstractFactory> results = new Dictionary<Type, AbstractFactory>();
             // Scan all loaded classes for default implementations
             IEnumerator enumerator = Thread.GetDomain().GetAssemblies().GetEnumerator();
             while (enumerator.MoveNext())
@@ -96,7 +96,7 @@ namespace TheGarageLab.Depends
                                     TestRegistrationTypes(target, current);
                                     if (results.ContainsKey(target))
                                         throw new MultipleDefaultImplementationsException(target);
-                                    results[target] = new ClassInstanceCreator(current, lifetime);
+                                    results[target] = new ClassFactory(current, lifetime);
                                 }
                             }
                         }
@@ -118,10 +118,10 @@ namespace TheGarageLab.Depends
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        private IInstanceCreator FindCreatorFor(Type t)
+        private AbstractFactory FindCreatorFor(Type t)
         {
             // Check for creator at this level
-            IInstanceCreator creator;
+            AbstractFactory creator;
             if ((Implementations != null) && Implementations.TryGetValue(t, out creator))
                 return creator;
             // Check defaults
@@ -130,7 +130,7 @@ namespace TheGarageLab.Depends
             // Finally, see if it can be created directly
             if (!t.IsClass || t.IsAbstract)
                 throw new NoImplementationSpecifiedForInterfaceException();
-            return new ClassInstanceCreator(t, Lifetime.Transient);
+            return new ClassFactory(t, Lifetime.Transient);
         }
 
         /// <summary>
@@ -139,13 +139,13 @@ namespace TheGarageLab.Depends
         /// <param name="t"></param>
         /// <param name="creator"></param>
         /// <returns></returns>
-        private void RegisterCreator(Type t, IInstanceCreator creator)
+        private void RegisterCreator(Type t, AbstractFactory creator)
         {
             // Safely add to this resolvers mapping and create a child resolver for it
             Monitor.Enter(this);
             // Map the implementation
             if (Implementations == null)
-                Implementations = new Dictionary<Type, IInstanceCreator>();
+                Implementations = new Dictionary<Type, AbstractFactory>();
             Implementations[t] = creator;
             Monitor.Exit(this);
         }
@@ -165,7 +165,7 @@ namespace TheGarageLab.Depends
         public void Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient)
         {
             TestRegistrationTypes(iface, cls);
-            RegisterCreator(iface, new ClassInstanceCreator(cls, lifetime));
+            RegisterCreator(iface, new ClassFactory(cls, lifetime));
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace TheGarageLab.Depends
             Ensure.IsNotNull(singleton);
             Ensure.IsTrue<ClassDoesNotImplementInterfaceException>(iface.IsAssignableFrom(singleton.GetType()));
             // Register the creator
-            RegisterCreator(iface, new SingletonInstanceCreator(singleton));
+            RegisterCreator(iface, new SingletonFactory(singleton));
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace TheGarageLab.Depends
             Ensure.IsNotNull(iface);
             Ensure.IsNotNull (factory);
             // Register the creator
-            RegisterCreator(iface, new FactoryInstanceCreator(iface, factory, lifetime));
+            RegisterCreator(iface, new FunctionFactory(iface, factory, lifetime));
         }
 
         /// <summary>

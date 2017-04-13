@@ -1,28 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using TheGarageLab.Ensures;
 
 namespace TheGarageLab.Depends
 {
-    internal class ClassInstanceCreator : IInstanceCreator
+    internal class ClassFactory : AbstractFactory
     {
         private readonly Type ForClass;
-        private readonly Lifetime Lifetime;
-        private object Singleton;
 
-        public ClassInstanceCreator(Type forClass, Lifetime lifetime)
+        /// <summary>
+        /// Constructor with class type and lifetime
+        /// </summary>
+        /// <param name="forClass"></param>
+        /// <param name="lifetime"></param>
+        public ClassFactory(Type forClass, Lifetime lifetime) : base(lifetime)
         {
             ForClass = forClass;
-            Lifetime = lifetime;
         }
 
-        #region Helpers
         /// <summary>
-        /// Find a constructor that has only Interface parameters
+        /// Find a suitable constructor (public, optionally marked with 'Injector')
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
@@ -38,7 +36,6 @@ namespace TheGarageLab.Depends
             // Could not determine injection point
             return null;
         }
-        #endregion
 
         /// <summary>
         /// Create a new instance of the class injecting all dependencies
@@ -46,11 +43,8 @@ namespace TheGarageLab.Depends
         /// </summary>
         /// <param name="resolver"></param>
         /// <returns></returns>
-        public object CreateInstance(IResolver resolver)
+        protected override object Factory(IResolver resolver)
         {
-            // If we have the singleton, just return it
-            if ((Lifetime == Lifetime.Singleton) && (Singleton != null))
-                return Singleton;
             // Find the constructor and list the arguments
             ConstructorInfo ctor = FindAppropriateConstructor(ForClass);
             Ensure.IsNotNull<UnableToDetermineInjectionPointException>(ctor);
@@ -59,12 +53,8 @@ namespace TheGarageLab.Depends
             object[] args = new object[parameters.Length];
             for (int p = 0; p < parameters.Length; p++)
                 args[p] = resolver.Resolve(parameters[p].ParameterType);
-            // Create the object (and save it if it is a singleton)
-            object result = Activator.CreateInstance(ForClass, args);
-            if (Lifetime == Lifetime.Singleton)
-                Singleton = result;
-            // All done
-            return result;
+            // Create the object
+            return Activator.CreateInstance(ForClass, args);
         }
     }
 }
