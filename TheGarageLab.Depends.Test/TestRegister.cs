@@ -71,5 +71,80 @@ namespace TheGarageLab.Depends.Test
             var resolver = new Resolver();
             Assert.Throws<ArgumentNullException>(() => { resolver.Register(typeof(TestCases.IService3), (Type)null); });
         }
+
+        /// <summary>
+        /// Resolver will register an object instance as a singleton
+        /// </summary>
+        [Fact]
+        public void WillRegisterSingleton()
+        {
+            var resolver = new Resolver();
+            var singleton = new TestCases.ImplementationOfIService2();
+            resolver.Register(typeof(TestCases.IService2), singleton);
+            Assert.Equal(singleton, resolver.Resolve(typeof(TestCases.IService2)));
+        }
+
+        /// <summary>
+        /// Resolver will not register an object instance if it does not
+        /// implement the target class.
+        /// </summary>
+        [Fact]
+        public void WillNotRegisterSingletonOfWrongClass()
+        {
+            var resolver = new Resolver();
+            var singleton = new TestCases.ImplementationOfIService1();
+            Assert.Throws<ClassDoesNotImplementInterfaceException>(() => { resolver.Register(typeof(TestCases.IService2), singleton); });
+        }
+
+        /// <summary>
+        /// Registering a singleton with a null type will fail.
+        /// </summary>
+        [Fact]
+        public void WillNotRegisterSingletonWithNullType()
+        {
+            var resolver = new Resolver();
+            var singleton = new TestCases.ImplementationOfIService1();
+            Assert.Throws<ArgumentException>(() => { resolver.Register(null, singleton); });
+        }
+
+        /// <summary>
+        /// Registering a null singleton fails
+        /// </summary>
+        [Fact]
+        public void WillNotRegisterNullSingleton()
+        {
+            var resolver = new Resolver();
+            Assert.Throws<ArgumentException>(() => { resolver.Register(typeof(TestCases.IService2), (object)null); });
+        }
+
+        /// <summary>
+        /// Will register a factory function to create instances
+        /// </summary>
+        [Fact]
+        public void WillRegisterFactoryFunction()
+        {
+            var resolver = new Resolver();
+            resolver.Register(typeof(TestCases.IService2), (r) => { return r.Resolve(typeof(TestCases.ImplementationOfIService2)); });
+        }
+
+        /// <summary>
+        /// Registering a factory with a null type will fail
+        /// </summary>
+        [Fact]
+        public void WillNotRegisterFactoryWithNullType()
+        {
+            var resolver = new Resolver();
+            Assert.Throws<ArgumentException>(() => { resolver.Register(null, (r) => { return r.Resolve(typeof(TestCases.ImplementationOfIService2)); }); });
+        }
+
+        /// <summary>
+        /// Registering a null factory will fail
+        /// </summary>
+        [Fact]
+        public void WillNotRegisterNullFactory()
+        {
+            var resolver = new Resolver();
+            Assert.Throws<ArgumentException>(() => { resolver.Register(typeof(TestCases.IService2), (Func<IResolver, object>)null); });
+        }
     }
 }
