@@ -1,7 +1,7 @@
 ﻿using System;
 using TheGarageLab.Ensures;
 
-namespace TheGarageLab.Depends
+namespace TheGarageLab.Depends.Factories
 {
     internal class FunctionFactory : AbstractFactory
     {

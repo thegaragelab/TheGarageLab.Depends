@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using TheGarageLab.Ensures;
 
-namespace TheGarageLab.Depends
+namespace TheGarageLab.Depends.Factories
 {
     internal class ClassFactory : AbstractFactory
     {

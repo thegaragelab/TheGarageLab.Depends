@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TheGarageLab.Depends
+﻿namespace TheGarageLab.Depends.Factories
 {
     /// <summary>
     /// Base class for instance factories. This provides a single point

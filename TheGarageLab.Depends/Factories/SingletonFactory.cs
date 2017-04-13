@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TheGarageLab.Depends
+namespace TheGarageLab.Depends.Factories
 {
     /// <summary>
     /// Instance creator for pre-created singletons.
