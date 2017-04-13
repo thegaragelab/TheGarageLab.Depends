@@ -32,7 +32,7 @@ namespace TheGarageLab.Depends
         /// <param name="factory"></param>
         /// <param name="lifetime"></param>
         /// <returns></returns>
-        void Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient);
+        void Register(Type iface, Func<IResolver, object> factory, Lifetime lifetime = Lifetime.Transient);
 
         /// <summary>
         /// Resolve an interface to it's required concrete implementation.

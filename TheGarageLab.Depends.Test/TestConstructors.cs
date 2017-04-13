@@ -19,7 +19,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseDefaultConstructor()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             var instance = resolver.Resolve(typeof(TestCases.ContainerWithExplicitDefaultConstructor));
             Assert.Equal(typeof(TestCases.ContainerWithExplicitDefaultConstructor), instance.GetType());
             Assert.True((instance as TestCases.ContainerWithExplicitDefaultConstructor).DefaultConstructorInvoked);
@@ -32,7 +32,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseAutomaticDefaultConstructor()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             var instance = resolver.Resolve(typeof(TestCases.ContainerWithAutomaticDefaultConstructor));
             Assert.Equal(typeof(TestCases.ContainerWithAutomaticDefaultConstructor), instance.GetType());
         }
@@ -44,7 +44,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseConstructorWithClassParameters()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
             var instance = resolver.Resolve(typeof(TestCases.ContainerWithClassInConstructor));
             Assert.NotNull(instance);
@@ -67,7 +67,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillFailIfMoreThanOneConstructor()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
             resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
             Assert.Throws<UnableToDetermineInjectionPointException>(() => { resolver.Resolve(typeof(TestCases.ContainerWithMultipleConstructors)); });
@@ -80,7 +80,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillUseInjectorAttribute()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
             resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
             var instance = resolver.Resolve(typeof(TestCases.ContainerWithMultipleConstructorsAndAttribute));
@@ -97,7 +97,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WilFailIfMoreThanOneMarkedConstructor()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
             resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
             Assert.Throws<UnableToDetermineInjectionPointException>(

@@ -11,7 +11,7 @@ namespace TheGarageLab.Depends
     /// <summary>
     /// Implementation of a dependency resolver node.
     /// </summary>
-    public class DependencyResolver : IResolver
+    public class Resolver : IResolver
     {
         // Lock object to control access to the default mappings
         private static object m_defaultLock = new object();
@@ -191,9 +191,13 @@ namespace TheGarageLab.Depends
         /// <param name="factory"></param>
         /// <param name="lifetime"></param>
         /// <returns></returns>
-        public void Register(Type iface, Func<object> factory, Lifetime lifetime = Lifetime.Transient)
+        public void Register(Type iface, Func<IResolver, object> factory, Lifetime lifetime = Lifetime.Transient)
         {
-            throw new NotImplementedException();
+            // Check parameters
+            Ensure.IsNotNull(iface);
+            Ensure.IsNotNull (factory);
+            // Register the creator
+            RegisterCreator(iface, new FactoryInstanceCreator(iface, factory, lifetime));
         }
 
         /// <summary>

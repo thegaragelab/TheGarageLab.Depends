@@ -14,7 +14,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillRegisterForAnInterface()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
             var created = resolver.Resolve(typeof(TestCases.IService1));
             Assert.Equal(typeof(TestCases.ImplementationOfIService1), created.GetType());
@@ -26,7 +26,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillNotRegisterForAClass()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             Assert.Throws<ArgumentException>(() => { resolver.Register(typeof(TestCases.ImplementationOfIService3), typeof(TestCases.AlternativeImplementationOfIService3)); });
         }
 
@@ -37,7 +37,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillNotRegisterChildInterfaceAsImplementation()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             Assert.Throws<ArgumentException>(() => { resolver.Register(typeof(TestCases.IService3), typeof(TestCases.IService3Extended)); });
         }
 
@@ -48,7 +48,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillNotRegisterNonImplementingClass()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             Assert.Throws<ClassDoesNotImplementInterfaceException>(() => { resolver.Register(typeof(TestCases.IService3), typeof(TestCases.ImplementationOfIService2)); });
         }
 
@@ -58,7 +58,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillNotRegisterForNullInterface()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             Assert.Throws<ArgumentNullException>(() => { resolver.Register(null, typeof(TestCases.ImplementationOfIService3)); });
         }
 
@@ -68,7 +68,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillNotRegisterForNullClass()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             Assert.Throws<ArgumentNullException>(() => { resolver.Register(typeof(TestCases.IService3), (Type)null); });
         }
     }

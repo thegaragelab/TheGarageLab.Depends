@@ -16,7 +16,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void SameInstanceReturnedForSingletons()
         {
-            var resolver = new DependencyResolver();
+            var resolver = new Resolver();
             resolver.Register<TestCases.IService1, TestCases.ImplementationOfIService1>(Lifetime.Singleton);
             var i1 = resolver.Resolve<TestCases.IService1>();
             var i2 = resolver.Resolve<TestCases.IService1>();

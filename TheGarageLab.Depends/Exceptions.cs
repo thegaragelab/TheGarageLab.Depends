@@ -74,4 +74,22 @@ namespace TheGarageLab.Depends
         /// <param name="forClass"></param>
         public MultipleInjectionPointsException(Type forClass) : base(forClass.FullName) { }
     }
+
+    /// <summary>
+    /// Exception thrown when object construction fails without a given reason.
+    /// </summary>
+    public class ObjectConstructionFailedException : Exception
+    {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public ObjectConstructionFailedException() { }
+
+        /// <summary>
+        /// Constructor with the class the error was found in
+        /// </summary>
+        /// <param name="forClass"></param>
+        public ObjectConstructionFailedException(Type forClass) : base(forClass.FullName) { }
+    }
+        
 }
