@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace TheGarageLab.Depends.Test
 {
@@ -96,5 +91,70 @@ namespace TheGarageLab.Depends.Test
             Assert.Throws<NoImplementationSpecifiedForInterfaceException>(() => { resolver.Resolve(typeof(TestCases.IService2)); });
         }
 
+        /// <summary>
+        /// A singleton will be resolved to the given instance
+        /// </summary>
+        [Fact]
+        public void WillResolveSingleton()
+        {
+            var resolver = new Resolver();
+            var singleton = new TestCases.ImplementationOfIService2();
+            resolver.Register(typeof(TestCases.IService2), singleton);
+            Assert.Equal(singleton, resolver.Resolve(typeof(TestCases.IService2)));
+        }
+
+        /// <summary>
+        /// Resolve will invoke the registered factory function
+        /// </summary>
+        [Fact]
+        public void WillResolveWithFactoryFunction()
+        {
+            var resolver = new Resolver();
+            resolver.Register(
+                typeof(TestCases.IService2),
+                (r) =>
+                {
+                    return r.Resolve(typeof(TestCases.AlternativeImplementationOfIService2));
+                }
+                );
+            var result = resolver.Resolve(typeof(TestCases.IService2));
+            Assert.NotNull(result);
+            Assert.Equal(typeof(TestCases.AlternativeImplementationOfIService2), result.GetType());
+        }
+
+        /// <summary>
+        /// If the factory function returns a null value the resolver will fail.
+        /// </summary>
+        [Fact]
+        public void WillNotResolveWithNullFactoryResult()
+        {
+            var resolver = new Resolver();
+            resolver.Register(
+                typeof(TestCases.IService2),
+                (r) =>
+                {
+                    return null;
+                }
+                );
+            Assert.Throws<ObjectConstructionFailedException>(() => { resolver.Resolve(typeof(TestCases.IService2)); });
+        }
+
+        /// <summary>
+        /// If the factory function returns an object of the wrong type
+        /// the resolver will fail.
+        /// </summary>
+        [Fact]
+        public void WillNotResolveWithWrongFactoryResultType()
+        {
+            var resolver = new Resolver();
+            resolver.Register(
+                typeof(TestCases.IService2),
+                (r) =>
+                {
+                    return r.Resolve(typeof(TestCases.AlternativeImplementationOfIService1));
+                }
+                );
+            Assert.Throws<ClassDoesNotImplementInterfaceException>(() => { resolver.Resolve(typeof(TestCases.IService2)); });
+        }
     }
 }
