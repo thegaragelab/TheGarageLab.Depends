@@ -36,7 +36,7 @@ namespace TheGarageLab.Depends.Factories
         protected override object Factory(IResolver resolver)
         {
             // Create (and verify) the new instance
-            object result = Factory(resolver);
+            object result = FactoryFunc(resolver);
             Ensure.IsNotNull<ObjectConstructionFailedException>(result);
             Ensure.IsTrue<ClassDoesNotImplementInterfaceException>(ForClass.IsAssignableFrom(result.GetType()));
             // All done
