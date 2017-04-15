@@ -13,17 +13,26 @@ namespace TheGarageLab.Depends
     /// </summary>
     public class Resolver : IResolver
     {
+        /// <summary>
+        /// Used to record information about default implementations
+        /// </summary>
+        private class ImplementationInformation
+        {
+            public Type Implementation;
+            public Lifetime Lifetime;
+        }
+
         // Lock object to control access to the default mappings
         private static object m_defaultLock = new object();
 
         // The actual default mappings, lazy initialised on first access
-        private static Dictionary<Type, AbstractFactory> m_defaults;
+        private static Dictionary<Type, ImplementationInformation> m_defaults;
 
         /// <summary>
         /// Provide access to the shared mapping of default implementations
         /// (classes marked with the DefaultImplementation attribute)
         /// </summary>
-        private static Dictionary<Type, AbstractFactory> Defaults
+        private static Dictionary<Type, ImplementationInformation> Defaults
         {
             get
             {
@@ -36,6 +45,16 @@ namespace TheGarageLab.Depends
                 return m_defaults;
             }
         }
+
+        /// <summary>
+        /// Reference to the parent resolver
+        /// </summary>
+        protected Resolver Parent { get; private set; }
+
+        /// <summary>
+        /// Child resolvers
+        /// </summary>
+        private HashSet<Resolver> Children;
 
         /// <summary>
         /// Map interfaces to instance creators
@@ -69,9 +88,9 @@ namespace TheGarageLab.Depends
         /// DefaultImplementation for an interface
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<Type, AbstractFactory> FindDefaultRegistrations()
+        private static Dictionary<Type, ImplementationInformation> FindDefaultRegistrations()
         {
-            Dictionary<Type, AbstractFactory> results = new Dictionary<Type, AbstractFactory>();
+            Dictionary<Type, ImplementationInformation> results = new Dictionary<Type, ImplementationInformation>();
             // Scan all loaded classes for default implementations
             IEnumerator enumerator = Thread.GetDomain().GetAssemblies().GetEnumerator();
             while (enumerator.MoveNext())
@@ -96,7 +115,11 @@ namespace TheGarageLab.Depends
                                     TestRegistrationTypes(target, current);
                                     if (results.ContainsKey(target))
                                         throw new MultipleDefaultImplementationsException(target);
-                                    results[target] = new ClassFactory(current, lifetime);
+                                    results[target] = new ImplementationInformation()
+                                    {
+                                        Implementation = current,
+                                        Lifetime = lifetime
+                                    };
                                 }
                             }
                         }
@@ -124,9 +147,9 @@ namespace TheGarageLab.Depends
             AbstractFactory creator;
             if ((Implementations != null) && Implementations.TryGetValue(t, out creator))
                 return creator;
-            // Check defaults
-            if (Defaults.TryGetValue(t, out creator))
-                return creator;
+            // Ask the the parent for a creator
+            if (Parent != null)
+                return Parent.FindCreatorFor(t);
             // Finally, see if it can be created directly
             if (!t.IsClass || t.IsAbstract)
                 throw new NoImplementationSpecifiedForInterfaceException();
@@ -148,6 +171,68 @@ namespace TheGarageLab.Depends
                 Implementations = new Dictionary<Type, AbstractFactory>();
             Implementations[t] = creator;
             Monitor.Exit(this);
+        }
+        #endregion
+
+        #region Parent/Child Management
+        /// <summary>
+        /// Add a new child to this resolver.
+        /// </summary>
+        /// <param name="resolver"></param>
+        protected void AddChild(Resolver resolver)
+        {
+            Monitor.Enter(this);
+            if (Children == null)
+                Children = new HashSet<Resolver>();
+            Children.Add(resolver);
+            Monitor.Exit(this);
+        }
+
+        /// <summary>
+        /// Remove a child from this resolver
+        /// </summary>
+        /// <param name="resolver"></param>
+        protected void RemoveChild(Resolver resolver)
+        {
+            Monitor.Enter(this);
+            try
+            {
+                if ((Children == null) || !Children.Contains(resolver))
+                    throw new InvalidOperationException("Attempting to remove unregistered child resolver.");
+                Children.Remove(resolver);
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            finally {
+                Monitor.Exit(this);
+            }
+        }
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// Internal constructor used for cloning
+        /// </summary>
+        /// <param name="parent"></param>
+        protected Resolver(Resolver parent)
+        {
+            Parent = parent;
+            Parent?.AddChild(this);
+        }
+
+        /// <summary>
+        /// Public constructor for root elements
+        /// </summary>
+        public Resolver() : this(null)
+        {
+            // This is a root resolver, add the default dependencies
+            foreach (Type target in Defaults.Keys)
+            {
+                var info = Defaults[target];
+                RegisterCreator(target, new ClassFactory(info.Implementation, info.Lifetime));
+            }
         }
         #endregion
 
