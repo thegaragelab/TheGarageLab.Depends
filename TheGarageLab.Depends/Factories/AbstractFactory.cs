@@ -64,13 +64,11 @@ namespace TheGarageLab.Depends.Factories
         /// </summary>
         public void Dispose()
         {
-            if (!Disposed)
-            {
-                Disposed = true;
-                var disposable = Singleton as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
-            }
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
+            Disposed = true;
+            var disposable = Singleton as IDisposable;
+            if (disposable != null)
+                disposable.Dispose();
         }
     }
 }

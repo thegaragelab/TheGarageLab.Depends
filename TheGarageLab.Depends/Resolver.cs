@@ -323,18 +323,23 @@ namespace TheGarageLab.Depends
         /// </summary>
         public void Dispose()
         {
-            if (!Disposed)
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
+            Disposed = true;
+            // Remove ourselves from our parent (if we have one)
+            if (Parent != null)
+                Parent.RemoveChild(this);
+            // Dispose all of the child elements
+            if (Children != null)
             {
-                Disposed = true;
-                // First, dispose all of the child elements
-                if (Children != null)
-                    foreach (var child in Children)
-                        child.Dispose();
-                // Now dispose of all our singleton instances
-                if (Implementations != null)
-                    foreach (var disposable in Implementations.Values)
-                        disposable.Dispose();
+                // Use a copy of the collection, it will be modified
+                // during the operation.
+                foreach (var child in new List<IResolver>(Children))
+                    child.Dispose();
             }
+            // Now dispose of all our singleton instances
+            if (Implementations != null)
+                foreach (var disposable in Implementations.Values)
+                    disposable.Dispose();
         }
         #endregion
     }
