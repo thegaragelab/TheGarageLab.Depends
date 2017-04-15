@@ -1,11 +1,13 @@
-﻿namespace TheGarageLab.Depends.Factories
+﻿using System;
+
+namespace TheGarageLab.Depends.Factories
 {
     /// <summary>
     /// Base class for instance factories. This provides a single point
     /// for all common behaviour which simplifies the implementation of
     /// the various factories.
     /// </summary>
-    internal abstract class AbstractFactory
+    internal abstract class AbstractFactory : IDisposable
     {
         /// <summary>
         /// The singleton instance
@@ -49,5 +51,15 @@
         /// </summary>
         /// <returns></returns>
         protected abstract object Factory(IResolver resolver);
+
+        /// <summary>
+        /// Dispose of any disposable singletons we have created.
+        /// </summary>
+        public void Dispose()
+        {
+            var disposable = Singleton as IDisposable;
+            if (disposable != null)
+                disposable.Dispose();
+        }
     }
 }

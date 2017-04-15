@@ -6,7 +6,7 @@ namespace TheGarageLab.Depends
     /// <summary>
     /// Defines the public interface to a dependency resolver.
     /// </summary>
-    public interface IResolver
+    public interface IResolver : IDisposable
     {
         /// <summary>
         /// Register an implementing class for the interface (or parent class)

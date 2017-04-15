@@ -296,6 +296,20 @@ namespace TheGarageLab.Depends
             Ensure.IsNotNull<ArgumentNullException>(iface);
             return FindCreatorFor(iface).CreateInstance(this);
         }
+
+        /// <summary>
+        /// Dispose of the object
+        /// </summary>
+        public void Dispose()
+        {
+            // First, dispose all of the child elements
+            if (Children != null)
+                foreach (var child in Children)
+                    child.Dispose();
+            // Now dispose of all our singleton instances
+            foreach (var disposable in Implementations.Values)
+                disposable.Dispose();
+        }
         #endregion
     }
 }
