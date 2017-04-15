@@ -48,6 +48,7 @@
     <Compile Include="Attributes.cs" />
     <Compile Include="Factories\ClassFactory.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="InjectionConfiguration.cs" />
     <Compile Include="IResolver.cs" />
     <Compile Include="Lifetime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

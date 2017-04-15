@@ -42,6 +42,12 @@ namespace TheGarageLab.Depends
         object Resolve(Type t);
 
         /// <summary>
+        /// Configure this instance from an external configuration.
+        /// </summary>
+        /// <param name="config"></param>
+        void Configure(IReadOnlyList<InjectionConfiguration> config);
+
+        /// <summary>
         /// Create a child resolver. The child will maintain it's
         /// own configuration but delegate to the parent for any
         /// unregistered types.

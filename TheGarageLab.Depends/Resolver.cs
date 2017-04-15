@@ -307,6 +307,23 @@ namespace TheGarageLab.Depends
         }
 
         /// <summary>
+        /// Configure this instance from an external configuration.
+        /// </summary>
+        /// <param name="config"></param>
+        public void Configure(IReadOnlyList<InjectionConfiguration> config)
+        {
+            // Check parameters
+            Ensure.IsNotNull(config);
+            // Add each entry
+            foreach (var injection in config)
+            {
+                Type t1 = Type.GetType(injection.Target, true, false);
+                Type t2 = Type.GetType(injection.Implementation, true, false);
+                Register(t1, t2, injection.Lifetime);
+            }
+        }
+
+        /// <summary>
         /// Create a child resolver. The child will maintain it's
         /// own configuration but delegate to the parent for any
         /// unregistered types.
