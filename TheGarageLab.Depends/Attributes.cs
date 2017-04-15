@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TheGarageLab.Depends
 {
@@ -14,6 +15,7 @@ namespace TheGarageLab.Depends
         /// </summary>
         /// <param name="forType"></param>
         /// <param name="lifetime"></param>
+        [ExcludeFromCodeCoverage]
         public DefaultImplementation(Type forType, Lifetime lifetime = Lifetime.Transient) { }
     }
 
@@ -22,8 +24,5 @@ namespace TheGarageLab.Depends
     /// to use for injection if there are multiple candidates available.
     /// </summary>
     [AttributeUsage(AttributeTargets.Constructor)]
-    public class Injector : Attribute
-    {
-        public Injector() { }
-    }
+    public class Injector : Attribute { }
 }
