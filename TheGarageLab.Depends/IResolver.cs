@@ -40,5 +40,13 @@ namespace TheGarageLab.Depends
         /// <param name="t"></param>
         /// <returns></returns>
         object Resolve(Type t);
+
+        /// <summary>
+        /// Create a child resolver. The child will maintain it's
+        /// own configuration but delegate to the parent for any
+        /// unregistered types.
+        /// </summary>
+        /// <returns></returns>
+        IResolver CreateChild();
     }
 }

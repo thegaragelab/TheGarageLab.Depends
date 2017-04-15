@@ -1,4 +1,5 @@
 ﻿using System;
+using TheGarageLab.Ensures;
 
 namespace TheGarageLab.Depends.Factories
 {
@@ -20,6 +21,11 @@ namespace TheGarageLab.Depends.Factories
         private readonly Lifetime Lifetime;
 
         /// <summary>
+        /// Set to true when the object has been disposed.
+        /// </summary>
+        private bool Disposed;
+
+        /// <summary>
         /// Constructor with a lifetime.
         /// </summary>
         /// <param name="lifetime"></param>
@@ -35,6 +41,7 @@ namespace TheGarageLab.Depends.Factories
         /// <returns></returns>
         public object CreateInstance(IResolver resolver)
         {
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
             // Just return the singleton if we have one
             if (Singleton != null)
                 return Singleton;
@@ -57,9 +64,13 @@ namespace TheGarageLab.Depends.Factories
         /// </summary>
         public void Dispose()
         {
-            var disposable = Singleton as IDisposable;
-            if (disposable != null)
-                disposable.Dispose();
+            if (!Disposed)
+            {
+                Disposed = true;
+                var disposable = Singleton as IDisposable;
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
     }
 }

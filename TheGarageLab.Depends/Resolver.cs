@@ -61,6 +61,11 @@ namespace TheGarageLab.Depends
         /// </summary>
         private Dictionary<Type, AbstractFactory> Implementations;
 
+        /// <summary>
+        /// Set to true when the object has been disposed.
+        /// </summary>
+        private bool Disposed;
+
         #region Helpers
         /// <summary>
         /// Determine if the class is a valid registration for the interface.
@@ -249,6 +254,7 @@ namespace TheGarageLab.Depends
         /// <returns></returns>
         public void Register(Type iface, Type cls, Lifetime lifetime = Lifetime.Transient)
         {
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
             TestRegistrationTypes(iface, cls);
             RegisterCreator(iface, new ClassFactory(cls, lifetime));
         }
@@ -261,6 +267,7 @@ namespace TheGarageLab.Depends
         /// <returns></returns>
         public void Register(Type iface, object singleton)
         {
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
             // Check parameters
             Ensure.IsNotNull(iface);
             Ensure.IsNotNull(singleton);
@@ -278,6 +285,7 @@ namespace TheGarageLab.Depends
         /// <returns></returns>
         public void Register(Type iface, Func<IResolver, object> factory, Lifetime lifetime = Lifetime.Transient)
         {
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
             // Check parameters
             Ensure.IsNotNull(iface);
             Ensure.IsNotNull (factory);
@@ -293,8 +301,21 @@ namespace TheGarageLab.Depends
         /// <returns></returns>
         public object Resolve(Type iface)
         {
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
             Ensure.IsNotNull<ArgumentNullException>(iface);
             return FindCreatorFor(iface).CreateInstance(this);
+        }
+
+        /// <summary>
+        /// Create a child resolver. The child will maintain it's
+        /// own configuration but delegate to the parent for any
+        /// unregistered types.
+        /// </summary>
+        /// <returns></returns>
+        public IResolver CreateChild()
+        {
+            Ensure.IsFalse<InvalidOperationException>(Disposed);
+            return new Resolver(this);
         }
 
         /// <summary>
@@ -302,13 +323,17 @@ namespace TheGarageLab.Depends
         /// </summary>
         public void Dispose()
         {
-            // First, dispose all of the child elements
-            if (Children != null)
-                foreach (var child in Children)
-                    child.Dispose();
-            // Now dispose of all our singleton instances
-            foreach (var disposable in Implementations.Values)
-                disposable.Dispose();
+            if (!Disposed)
+            {
+                Disposed = true;
+                // First, dispose all of the child elements
+                if (Children != null)
+                    foreach (var child in Children)
+                        child.Dispose();
+                // Now dispose of all our singleton instances
+                foreach (var disposable in Implementations.Values)
+                    disposable.Dispose();
+            }
         }
         #endregion
     }
