@@ -17,9 +17,9 @@ namespace TheGarageLab.Depends.Test
         public void SameInstanceReturnedForSingletons()
         {
             var resolver = new Resolver();
-            resolver.Register<TestCases.IService1, TestCases.ImplementationOfIService1>(Lifetime.Singleton);
-            var i1 = resolver.Resolve<TestCases.IService1>();
-            var i2 = resolver.Resolve<TestCases.IService1>();
+            resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1), Lifetime.Singleton);
+            var i1 = resolver.Resolve(typeof(TestCases.IService1));
+            var i2 = resolver.Resolve(typeof(TestCases.IService1));
             Assert.Equal(i1, i2);
         }
     }
