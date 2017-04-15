@@ -331,8 +331,9 @@ namespace TheGarageLab.Depends
                     foreach (var child in Children)
                         child.Dispose();
                 // Now dispose of all our singleton instances
-                foreach (var disposable in Implementations.Values)
-                    disposable.Dispose();
+                if (Implementations != null)
+                    foreach (var disposable in Implementations.Values)
+                        disposable.Dispose();
             }
         }
         #endregion
