@@ -20,6 +20,11 @@ namespace TheGarageLab.Depends.Test
 
         public interface IService3Extended : IService3 { }
 
+        public interface IDisposableService : IDisposable
+        {
+            bool Disposed { get; }
+        }
+
         public class ImplementationOfIService1 : IService1 { }
 
         public class AlternativeImplementationOfIService1 : IService1 { }
@@ -32,6 +37,16 @@ namespace TheGarageLab.Depends.Test
         public class AlternativeImplementationOfIService2 : IService2 { }
 
         public class ImplementationOfIService3 : IService3 { }
+
+        public class ImplementationOfIDisposableService : IDisposableService
+        {
+            public bool Disposed { get; private set; }
+
+            public void Dispose()
+            {
+                Disposed = true;
+            }
+        }
 
         /// <summary>
         /// Subclass of another implementation. Should be treated as a new
