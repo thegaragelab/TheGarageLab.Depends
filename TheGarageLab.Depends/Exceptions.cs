@@ -23,34 +23,11 @@ namespace TheGarageLab.Depends
     }
 
     /// <summary>
-    /// Exception thrown when a suitable constructor could not be found to
-    /// perform the injection.
-    /// </summary>
-    public class UnableToDetermineInjectionPointException : Exception
-    {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public UnableToDetermineInjectionPointException() : base() { }
-
-        /// <summary>
-        /// Constructor with the interface being provided with a default
-        /// </summary>
-        /// <param name="iface"></param>
-        public UnableToDetermineInjectionPointException(Type iface) : base(iface.FullName) { }
-    }
-
-    /// <summary>
     /// Exception thrown when multiple default implementations of a specific
     /// interface have been found.
     /// </summary>
     public class MultipleDefaultImplementationsException : Exception
     {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public MultipleDefaultImplementationsException() : base() { }
-
         /// <summary>
         /// Constructor with the interface being provided with a default
         /// </summary>
@@ -64,11 +41,6 @@ namespace TheGarageLab.Depends
     public class MultipleInjectionPointsException : Exception
     {
         /// <summary>
-        /// Default constructor
-        /// </summary>
-        public MultipleInjectionPointsException() { }
-
-        /// <summary>
         /// Constructor with the class the error was found in
         /// </summary>
         /// <param name="forClass"></param>
@@ -80,16 +52,6 @@ namespace TheGarageLab.Depends
     /// </summary>
     public class ObjectConstructionFailedException : Exception
     {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public ObjectConstructionFailedException() { }
-
-        /// <summary>
-        /// Constructor with the class the error was found in
-        /// </summary>
-        /// <param name="forClass"></param>
-        public ObjectConstructionFailedException(Type forClass) : base(forClass.FullName) { }
     }
         
 }

@@ -34,7 +34,7 @@ namespace TheGarageLab.Depends.Factories
             if (injectable.Count() == 1)
                 return injectable.First();
             // Could not determine injection point
-            return null;
+            throw new MultipleInjectionPointsException(t);
         }
 
         /// <summary>
@@ -47,8 +47,7 @@ namespace TheGarageLab.Depends.Factories
         {
             // Find the constructor and list the arguments
             ConstructorInfo ctor = FindAppropriateConstructor(ForClass);
-            Ensure.IsNotNull<UnableToDetermineInjectionPointException>(ctor);
-            // Recursivley create the required dependency arguments
+            // Recursively create the required dependency arguments
             var parameters = ctor.GetParameters();
             object[] args = new object[parameters.Length];
             for (int p = 0; p < parameters.Length; p++)

@@ -70,7 +70,7 @@ namespace TheGarageLab.Depends.Test
             var resolver = new Resolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
             resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
-            Assert.Throws<UnableToDetermineInjectionPointException>(() => { resolver.Resolve(typeof(TestCases.ContainerWithMultipleConstructors)); });
+            Assert.Throws<MultipleInjectionPointsException>(() => { resolver.Resolve(typeof(TestCases.ContainerWithMultipleConstructors)); });
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace TheGarageLab.Depends.Test
             var resolver = new Resolver();
             resolver.Register(typeof(TestCases.IService1), typeof(TestCases.ImplementationOfIService1));
             resolver.Register(typeof(TestCases.IService2), typeof(TestCases.ImplementationOfIService2));
-            Assert.Throws<UnableToDetermineInjectionPointException>(
+            Assert.Throws<MultipleInjectionPointsException>(
                 () =>
                 {
                     resolver.Resolve(typeof(TestCases.ContainerWithMultipleConstructorsAndMultipleAttributes));
