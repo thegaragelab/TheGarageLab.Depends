@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace TheGarageLab.Depends.Factories
 {
@@ -23,7 +22,6 @@ namespace TheGarageLab.Depends.Factories
         /// </summary>
         /// <param name="resolver"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         protected override object Factory(IResolver resolver)
         {
             // This method should never be called

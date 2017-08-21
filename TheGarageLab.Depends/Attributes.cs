@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace TheGarageLab.Depends
 {
@@ -15,7 +14,6 @@ namespace TheGarageLab.Depends
         /// </summary>
         /// <param name="forType"></param>
         /// <param name="lifetime"></param>
-        [ExcludeFromCodeCoverage]
         public DefaultImplementation(Type forType, Lifetime lifetime = Lifetime.Transient) { }
     }
 
