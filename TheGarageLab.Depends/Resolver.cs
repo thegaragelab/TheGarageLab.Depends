@@ -40,7 +40,7 @@ namespace TheGarageLab.Depends
                 // threads don't try and modify it at the same time.
                 Monitor.Enter(m_defaultLock);
                 if (m_defaults == null)
-                    m_defaults = FindDefaultRegistrations();
+                    m_defaults = new Dictionary<Type, ImplementationInformation>(); // See TGL-727 FindDefaultRegistrations();
                 Monitor.Exit(m_defaultLock);
                 return m_defaults;
             }
@@ -82,9 +82,9 @@ namespace TheGarageLab.Depends
         private static void TestRegistrationTypes(Type iface, Type cls)
         {
             Ensure.IsNotNull<ArgumentNullException>(iface);
-            Ensure.IsTrue(iface.IsInterface);
+            Ensure.IsTrue(iface.IsInterface());
             Ensure.IsNotNull<ArgumentNullException>(cls);
-            Ensure.IsTrue(cls.IsClass);
+            Ensure.IsTrue(cls.IsClass());
             Ensure.IsTrue<ClassDoesNotImplementInterfaceException>(iface.IsAssignableFrom(cls));
         }
 
@@ -93,6 +93,14 @@ namespace TheGarageLab.Depends
         /// DefaultImplementation for an interface
         /// </summary>
         /// <returns></returns>
+/* TODO: This needs to be reimplemented in a way that is compatible with NetStandard. Something like ...
+  
+   var libs = PlatformServices.Default.LibraryManager.GetReferencingLibraries("myLib")
+           .SelectMany(info => info.Assemblies)
+           .Select(info => Assembly.Load(new AssemblyName(info.Name)));
+
+    For now, you don't get default implementations. See TGL-727
+
         private static Dictionary<Type, ImplementationInformation> FindDefaultRegistrations()
         {
             Dictionary<Type, ImplementationInformation> results = new Dictionary<Type, ImplementationInformation>();
@@ -109,9 +117,9 @@ namespace TheGarageLab.Depends
                         while (enumerator2.MoveNext())
                         {
                             Type current = (Type)enumerator2.Current;
-                            if (current.IsAbstract || current.IsInterface)
+                            if (current.IsAbstract() || current.IsInterface())
                                 continue;
-                            foreach (var attribute in current.CustomAttributes)
+                            foreach (var attribute in current.CustomAttributes())
                             {
                                 if (attribute.AttributeType == typeof(DefaultImplementation))
                                 {
@@ -139,6 +147,7 @@ namespace TheGarageLab.Depends
             }
             return results;
         }
+*/
 
         /// <summary>
         /// Walk the resolver tree to find an appropriate instance
@@ -156,7 +165,7 @@ namespace TheGarageLab.Depends
             if (Parent != null)
                 return Parent.FindCreatorFor(t);
             // Finally, see if it can be created directly
-            if (!t.IsClass || t.IsAbstract)
+            if (!t.IsClass() || t.IsAbstract())
                 throw new NoImplementationSpecifiedForInterfaceException();
             return new ClassFactory(t, Lifetime.Transient);
         }
@@ -361,3 +370,4 @@ namespace TheGarageLab.Depends
         #endregion
     }
 }
+ 
