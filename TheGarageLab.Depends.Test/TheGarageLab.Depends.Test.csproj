@@ -91,13 +91,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TheGarageLab.Depends\TheGarageLab.Depends.csproj">
-      <Project>{8A53D317-B22C-4B35-96F5-18415B0E8FEA}</Project>
-      <Name>TheGarageLab.Depends</Name>
-    </ProjectReference>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <ProjectReference Include="..\TheGarageLab.Depends\TheGarageLab.Depends.csproj">
+      <Project>{4ee9adba-06f5-4bf3-84a6-80f9385089f3}</Project>
+      <Name>TheGarageLab.Depends</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
