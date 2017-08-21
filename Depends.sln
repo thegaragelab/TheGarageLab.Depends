@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheGarageLab.Depends.Test", "TheGarageLab.Depends.Test\TheGarageLab.Depends.Test.csproj", "{FD277447-6689-4FB8-9F15-7C29C49407A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheGarageLab.Depends", "TheGarageLab.Depends\TheGarageLab.Depends.csproj", "{4EE9ADBA-06F5-4BF3-84A6-80F9385089F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGarageLab.Depends", "TheGarageLab.Depends\TheGarageLab.Depends.csproj", "{4EE9ADBA-06F5-4BF3-84A6-80F9385089F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,9 +30,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{4EE9ADBA-06F5-4BF3-84A6-80F9385089F3} = {35712429-E401-4C44-8D52-98343676EF96}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DCC83676-E44C-4DD5-96BE-8D6C3AE5B70E}
