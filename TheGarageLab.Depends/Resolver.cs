@@ -25,26 +25,11 @@ namespace TheGarageLab.Depends
         // Lock object to control access to the default mappings
         private static object m_defaultLock = new object();
 
-        // The actual default mappings, lazy initialised on first access
-        private static Dictionary<Type, ImplementationInformation> m_defaults;
-
         /// <summary>
         /// Provide access to the shared mapping of default implementations
         /// (classes marked with the DefaultImplementation attribute)
         /// </summary>
-        private static Dictionary<Type, ImplementationInformation> Defaults
-        {
-            get
-            {
-                // This is global state so make sure multiple
-                // threads don't try and modify it at the same time.
-                Monitor.Enter(m_defaultLock);
-                if (m_defaults == null)
-                    m_defaults = FindDefaultRegistrations();
-                Monitor.Exit(m_defaultLock);
-                return m_defaults;
-            }
-        }
+        private static Dictionary<Type, ImplementationInformation> Defaults;
 
         /// <summary>
         /// Reference to the parent resolver
@@ -93,19 +78,16 @@ namespace TheGarageLab.Depends
         /// DefaultImplementation for an interface
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<Type, ImplementationInformation> FindDefaultRegistrations()
+        private static Dictionary<Type, ImplementationInformation> FindDefaultRegistrations(IEnumerable<Assembly> assemblies)
         {
             Dictionary<Type, ImplementationInformation> results = new Dictionary<Type, ImplementationInformation>();
             // Find all assemblies that reference us
-            foreach (var assembly in ReflectionHelp.GetReferencingAssemblies(typeof(Resolver).GetTypeInfo().Assembly))
+            foreach (var assembly in assemblies)
             {
                 try
                 {
-                    Type[] types = assembly.GetTypes();
-                    IEnumerator enumerator2 = types.GetEnumerator();
-                    while (enumerator2.MoveNext())
+                    foreach (var current in assembly.ExportedTypes)
                     {
-                        Type current = (Type)enumerator2.Current;
                         if (current.IsAbstract() || current.IsInterface())
                             continue;
                         foreach (var attribute in current.CustomAttributes())
@@ -226,8 +208,20 @@ namespace TheGarageLab.Depends
         /// <summary>
         /// Public constructor for root elements
         /// </summary>
-        public Resolver() : this(null)
+        /// <param name="assemblies"></param>
+        public Resolver(IEnumerable<Assembly> assemblies = null) : this((Resolver)null)
         {
+            // Update defaults on the very first construction
+            if (Defaults == null)
+            {
+                // Populate defaults
+                if (assemblies != null)
+                    Defaults = FindDefaultRegistrations(assemblies);
+                else
+                    Defaults = new Dictionary<Type, ImplementationInformation>();
+            }
+            else
+                Ensure.IsNull(assemblies);
             // This is a root resolver, add the default dependencies
             foreach (Type target in Defaults.Keys)
             {
