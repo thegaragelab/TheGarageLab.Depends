@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Reflection;
 using System.Collections;
@@ -77,44 +78,30 @@ namespace TheGarageLab.Depends
             {
                 try
                 {
-                    // Get the types (if the assembly is loaded)
-                    IEnumerable<Type> exportedTypes;
-                    try
-                    {
-                        exportedTypes = assembly.ExportedTypes;
-                    }
-                    catch (Exception ex)
-                    {
-                        continue;
-                    }
-                    // Look for decorations
-                    foreach (var current in exportedTypes)
+                    // Find all classes with the 'DefaultImplementation' attribute
+                    var candidates = ReflectionHelp.FindClassesWithAttribute<DefaultImplementation>(assembly.ExportedTypes);
+                    foreach (var current in candidates.Keys)
                     {
                         if (current.IsAbstract() || current.IsInterface())
                             continue;
-                        foreach (var attribute in current.CustomAttributes())
+                        foreach (var attribute in candidates[current])
                         {
-                            if (attribute.AttributeType == typeof(DefaultImplementation))
+                            Type target = attribute.ConstructorArguments[0].Value as Type;
+                            Lifetime lifetime = (Lifetime)attribute.ConstructorArguments[1].Value;
+                            TestRegistrationTypes(target, current);
+                            if (results.ContainsKey(target))
+                                throw new MultipleDefaultImplementationsException(target);
+                            results[target] = new ImplementationInformation()
                             {
-                                Type target = attribute.ConstructorArguments[0].Value as Type;
-                                Lifetime lifetime = (Lifetime)attribute.ConstructorArguments[1].Value;
-                                TestRegistrationTypes(target, current);
-                                if (results.ContainsKey(target))
-                                    throw new MultipleDefaultImplementationsException(target);
-                                results[target] = new ImplementationInformation()
-                                {
-                                    Implementation = current,
-                                    Lifetime = lifetime
-                                };
-                            }
+                                Implementation = current,
+                                Lifetime = lifetime
+                            };
                         }
                     }
                 }
-                catch (ReflectionTypeLoadException ex)
+                catch (FileNotFoundException)
                 {
-                    Console.WriteLine("Failed to enumerate types from assemblies. More information ...");
-                    foreach (var e in ex.LoaderExceptions)
-                        Console.WriteLine("  {0}", e.ToString());
+                    Console.WriteLine("Failed to enumerate types from assembly {0}, could not load assembly", assembly.FullName);
                 }
             }
             return results;
