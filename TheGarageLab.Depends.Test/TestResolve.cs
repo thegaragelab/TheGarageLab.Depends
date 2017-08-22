@@ -1,7 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
-using System;
 
 namespace TheGarageLab.Depends.Test
 {
@@ -13,7 +14,7 @@ namespace TheGarageLab.Depends.Test
         /// <returns></returns>
         private static List<Assembly> GetLoadedAssemblies()
         {
-            return new List<Assembly>(AppDomain.CurrentDomain.GetAssemblies());
+            return new List<Assembly>(AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic));
         }
 
         /// <summary>
