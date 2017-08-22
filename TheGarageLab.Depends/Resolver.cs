@@ -22,15 +22,6 @@ namespace TheGarageLab.Depends
             public Lifetime Lifetime;
         }
 
-        // Lock object to control access to the default mappings
-        private static object m_defaultLock = new object();
-
-        /// <summary>
-        /// Provide access to the shared mapping of default implementations
-        /// (classes marked with the DefaultImplementation attribute)
-        /// </summary>
-        private static Dictionary<Type, ImplementationInformation> Defaults;
-
         /// <summary>
         /// Reference to the parent resolver
         /// </summary>
@@ -86,7 +77,18 @@ namespace TheGarageLab.Depends
             {
                 try
                 {
-                    foreach (var current in assembly.ExportedTypes)
+                    // Get the types (if the assembly is loaded)
+                    IEnumerable<Type> exportedTypes;
+                    try
+                    {
+                        exportedTypes = assembly.ExportedTypes;
+                    }
+                    catch (Exception ex)
+                    {
+                        continue;
+                    }
+                    // Look for decorations
+                    foreach (var current in exportedTypes)
                     {
                         if (current.IsAbstract() || current.IsInterface())
                             continue;
@@ -211,22 +213,15 @@ namespace TheGarageLab.Depends
         /// <param name="assemblies"></param>
         public Resolver(IEnumerable<Assembly> assemblies = null) : this((Resolver)null)
         {
-            // Update defaults on the very first construction
-            if (Defaults == null)
+            // If we have been given a list of assemblies register the default implementations
+            if (assemblies != null)
             {
-                // Populate defaults
-                if (assemblies != null)
-                    Defaults = FindDefaultRegistrations(assemblies);
-                else
-                    Defaults = new Dictionary<Type, ImplementationInformation>();
-            }
-            else
-                Ensure.IsNull(assemblies);
-            // This is a root resolver, add the default dependencies
-            foreach (Type target in Defaults.Keys)
-            {
-                var info = Defaults[target];
-                RegisterCreator(target, new ClassFactory(info.Implementation, info.Lifetime));
+                var defaults = FindDefaultRegistrations(assemblies);
+                foreach (Type target in defaults.Keys)
+                {
+                    var info = defaults[target];
+                    RegisterCreator(target, new ClassFactory(info.Implementation, info.Lifetime));
+                }
             }
         }
         #endregion
