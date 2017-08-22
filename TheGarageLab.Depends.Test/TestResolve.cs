@@ -1,9 +1,21 @@
-﻿using Xunit;
+﻿using System.Reflection;
+using System.Collections.Generic;
+using Xunit;
+using System;
 
 namespace TheGarageLab.Depends.Test
 {
     public class TestResolve
     {
+        /// <summary>
+        /// Get a list of loaded assemblies
+        /// </summary>
+        /// <returns></returns>
+        private static List<Assembly> GetLoadedAssemblies()
+        {
+            return new List<Assembly>(AppDomain.CurrentDomain.GetAssemblies());
+        }
+
         /// <summary>
         /// If a class type is passed to resolver it should create an instance of that class
         /// </summary>
@@ -18,12 +30,12 @@ namespace TheGarageLab.Depends.Test
 
         /// <summary>
         /// If a class type is passed to resolver that has dependencies those dependencies should
-        /// be resolved.
+        /// be resolved regardless of if they are defaults or manually registered.
         /// </summary>
         [Fact]
         public void WillInstantiateFromClassTypeAndInject()
         {
-            var resolver = new Resolver();
+            var resolver = new Resolver(GetLoadedAssemblies());
             var result = resolver.Resolve(typeof(TestCases.ContainerWithDependencies));
             Assert.NotNull(result);
             Assert.NotNull((result as TestCases.ContainerWithDependencies).Service);
@@ -37,7 +49,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateDefaultImplementation()
         {
-            var resolver = new Resolver();
+            var resolver = new Resolver(GetLoadedAssemblies());
             var result = resolver.Resolve(typeof(TestCases.IService1));
             Assert.NotNull(result);
             Assert.Equal(typeof(TestCases.DefaultImplementationOfIService1), result.GetType());
@@ -50,7 +62,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateRegisteredImplementation()
         {
-            var resolver = new Resolver();
+            var resolver = new Resolver(GetLoadedAssemblies());
             // Verify there is a default implementation
             var result = resolver.Resolve(typeof(TestCases.IService1));
             Assert.NotNull(result);
