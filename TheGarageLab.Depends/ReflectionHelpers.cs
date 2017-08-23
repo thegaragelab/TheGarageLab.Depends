@@ -17,11 +17,18 @@ namespace TheGarageLab.Depends
         /// <typeparam name="T"></typeparam>
         /// <param name="types"></param>
         /// <returns></returns>
-        public static Dictionary<Type, List<CustomAttributeData>> FindClassesWithAttribute<T>(IEnumerable<Type> types) where T : Attribute
+        public static Dictionary<Type, List<CustomAttributeData>> FindClassesWithAttribute<T>(Assembly assembly) where T : Attribute
         {
             var results = new Dictionary<Type, List<CustomAttributeData>>();
-            foreach (var candidate in types.Where(t => t.IsClass() && t.CustomAttributes().Where(c => c.AttributeType == typeof(T)).Any()))
-                results[candidate] = candidate.CustomAttributes().Where(c => c.AttributeType == typeof(T)).ToList();
+            try
+            {
+                foreach (var candidate in assembly.DefinedTypes.Where(t => t.IsClass && t.CustomAttributes.Where(c => c.AttributeType == typeof(T)).Any()))
+                    results[candidate.AsType()] = candidate.CustomAttributes.Where(c => c.AttributeType == typeof(T)).ToList();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                // Silently consume the exception
+            }
             return results;
         }
 

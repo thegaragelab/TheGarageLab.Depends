@@ -77,32 +77,25 @@ namespace TheGarageLab.Depends
             // Find all assemblies that reference us
             foreach (var assembly in assemblies.Distinct())
             {
-                try
+                // Find all classes with the 'DefaultImplementation' attribute
+                var candidates = ReflectionHelpers.FindClassesWithAttribute<DefaultImplementation>(assembly);
+                foreach (var current in candidates.Keys)
                 {
-                    // Find all classes with the 'DefaultImplementation' attribute
-                    var candidates = ReflectionHelpers.FindClassesWithAttribute<DefaultImplementation>(assembly.ExportedTypes);
-                    foreach (var current in candidates.Keys)
+                    if (current.IsAbstract() || current.IsInterface())
+                        continue;
+                    foreach (var attribute in candidates[current])
                     {
-                        if (current.IsAbstract() || current.IsInterface())
-                            continue;
-                        foreach (var attribute in candidates[current])
+                        Type target = attribute.ConstructorArguments[0].Value as Type;
+                        Lifetime lifetime = (Lifetime)attribute.ConstructorArguments[1].Value;
+                        TestRegistrationTypes(target, current);
+                        if (results.ContainsKey(target))
+                            throw new MultipleDefaultImplementationsException(target);
+                        results[target] = new ImplementationInformation()
                         {
-                            Type target = attribute.ConstructorArguments[0].Value as Type;
-                            Lifetime lifetime = (Lifetime)attribute.ConstructorArguments[1].Value;
-                            TestRegistrationTypes(target, current);
-                            if (results.ContainsKey(target))
-                                throw new MultipleDefaultImplementationsException(target);
-                            results[target] = new ImplementationInformation()
-                            {
-                                Implementation = current,
-                                Lifetime = lifetime
-                            };
-                        }
+                            Implementation = current,
+                            Lifetime = lifetime
+                        };
                     }
-                }
-                catch (FileNotFoundException)
-                {
-                    Console.WriteLine("Failed to enumerate types from assembly {0}, could not load assembly", assembly.FullName);
                 }
             }
             return results;
