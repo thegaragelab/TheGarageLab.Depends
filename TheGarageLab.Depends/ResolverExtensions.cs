@@ -2,7 +2,7 @@
 
 namespace TheGarageLab.Depends
 {
-    public static class Extensions
+    public static class ResolverExtensions
     {
         /// <summary>
         /// Generic version of type registration

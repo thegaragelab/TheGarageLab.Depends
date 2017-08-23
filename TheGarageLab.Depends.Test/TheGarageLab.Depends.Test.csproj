@@ -136,7 +136,7 @@
     <Compile Include="TestConfiguration.cs" />
     <Compile Include="TestConstructors.cs" />
     <Compile Include="TestDispose.cs" />
-    <Compile Include="TestExtensions.cs" />
+    <Compile Include="TestResolverExtensions.cs" />
     <Compile Include="TestRegister.cs" />
     <Compile Include="TestResolve.cs" />
     <Compile Include="TestSingletons.cs" />

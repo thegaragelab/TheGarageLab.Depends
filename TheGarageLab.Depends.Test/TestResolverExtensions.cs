@@ -7,7 +7,7 @@ namespace TheGarageLab.Depends.Test
     /// <summary>
     /// Test the extension methods
     /// </summary>
-    public class TestExtensions
+    public class TestResolverExtensions
     {
         /// <summary>
         /// Default class registration lifetime is Transient
