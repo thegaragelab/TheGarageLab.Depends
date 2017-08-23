@@ -57,6 +57,22 @@ namespace TheGarageLab.Depends.Test
         }
 
         /// <summary>
+        /// If the same assembly is provided multiple times in the search list the
+        /// default implementations will only be registered once.
+        /// </summary>
+        [Fact]
+        public void DuplicateAssembliesWillBeIgnored()
+        {
+            var assemblies = GetLoadedAssemblies();
+            assemblies.AddRange(GetLoadedAssemblies());
+            var resolver = new Resolver(assemblies);
+            // Make sure we can still resolve a default implementation
+            var result = resolver.Resolve(typeof(TestCases.IService1));
+            Assert.NotNull(result);
+            Assert.Equal(typeof(TestCases.DefaultImplementationOfIService1), result.GetType());
+        }
+
+        /// <summary>
         /// If there is a default implmentation and an alternative is registered
         /// manually that is the class that will be instantiated.
         /// </summary>
@@ -82,7 +98,7 @@ namespace TheGarageLab.Depends.Test
         [Fact]
         public void WillInstantiateWithoutDefaultImplementation()
         {
-            var resolver = new Resolver();
+            var resolver = new Resolver(GetLoadedAssemblies());
             // Verify there is not a default implementation
             Assert.Throws<NoImplementationSpecifiedForInterfaceException>(() => { resolver.Resolve(typeof(TestCases.IService2)); });
             // Register the implementation and ensure it is resolved

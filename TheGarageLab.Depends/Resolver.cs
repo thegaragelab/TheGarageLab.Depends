@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Reflection;
 using System.Collections;
@@ -74,7 +75,7 @@ namespace TheGarageLab.Depends
         {
             Dictionary<Type, ImplementationInformation> results = new Dictionary<Type, ImplementationInformation>();
             // Find all assemblies that reference us
-            foreach (var assembly in assemblies)
+            foreach (var assembly in assemblies.Distinct())
             {
                 try
                 {
