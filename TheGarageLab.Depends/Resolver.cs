@@ -79,7 +79,7 @@ namespace TheGarageLab.Depends
                 try
                 {
                     // Find all classes with the 'DefaultImplementation' attribute
-                    var candidates = ReflectionHelp.FindClassesWithAttribute<DefaultImplementation>(assembly.ExportedTypes);
+                    var candidates = ReflectionHelpers.FindClassesWithAttribute<DefaultImplementation>(assembly.ExportedTypes);
                     foreach (var current in candidates.Keys)
                     {
                         if (current.IsAbstract() || current.IsInterface())

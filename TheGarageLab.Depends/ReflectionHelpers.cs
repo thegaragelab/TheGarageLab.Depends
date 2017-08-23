@@ -9,7 +9,7 @@ namespace TheGarageLab.Depends
     /// <summary>
     /// Helper methods to perform reflection related tasks
     /// </summary>
-    public static class ReflectionHelp
+    public static class ReflectionHelpers
     {
         /// <summary>
         /// Find all types in the list that are classes and have the given attribute
